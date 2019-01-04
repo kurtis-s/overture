@@ -1,5 +1,6 @@
 # overature
 [![Build Status](https://travis-ci.org/kurtis-s/overature.svg?branch=master)](https://travis-ci.org/kurtis-s/overature)
+[![Coverage status](https://codecov.io/gh/kurtis-s/overature/branch/master/graph/badge.svg)](https://codecov.io/github/kurtis-s/overature?branch=master)
 
 `overature` makes writing Markov chain Monte Carlo (MCMC) samplers simpler.  With overature you can:
 
