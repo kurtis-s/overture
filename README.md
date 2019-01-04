@@ -7,7 +7,7 @@
 * **Write less code** `overature` eliminates boilerplate code, looping through sampling functions and saving the results automatically.
 * **Easily recover from interruptions** Samples can be saved on-disk as the MCMC runs, so it's easy to resume an MCMC if something goes wrong.
 * **Run more chains in parallel** Saving samples on-disk results in a dramatically smaller memory footprint for high-dimensional models, allowing more chains to be run when available RAM is limited.
-* **Monitor chain progress** Completed samples can be viewed in another R process while the MCMC is still running.
+* **Monitor chain progress** Samples can be viewed in another R process while the MCMC is still running.
 
 ## Usage
 Using `overature` is easy:
