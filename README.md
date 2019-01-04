@@ -1,5 +1,7 @@
 # overature
-`overature` is an R package that makes writing Markov chain Monte Carlo (MCMC) samplers easier.  With overature you can:
+[![Build Status](https://travis-ci.org/kurtis-s/overature.svg?branch=master)](https://travis-ci.org/kurtis-s/overature)
+
+`overature` makes writing Markov chain Monte Carlo (MCMC) samplers simpler.  With overature you can:
 
 * **Write less code** `overature` eliminates boilerplate code, looping through sampling functions and saving the results automatically.
 * **Easily recover from interruptions** Samples can be saved on-disk as the MCMC runs, so it's easy to resume an MCMC if something goes wrong.
