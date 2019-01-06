@@ -74,6 +74,14 @@ DeltaNDefault <- function(n) {
 #' individually, updating each using Metropolis step.  In this case, \eqn{f}
 #' should contructed to receive \eqn{s} as a vector argument.
 #'
+#' @param f non-adaptive Metropolis sampler of the form f(..., s)
+#' @param s initial value for the Metropolis proposal SD
+#' @param batch.size number of iterations before proposal SD is adapted
+#' @param target target acceptance rate
+#' @param DeltaN function of the form f(n) which returns the adaptation amount
+#'   based on the number of elapsed iterations, n.  Defaults to min(0.01,
+#'   n^{-1/2}) if not specified.
+#' @return Adaptive Metropolis sampler function of the form g(...).
 #' @references  Gareth O. Roberts & Jeffrey S. Rosenthal (2009) Examples of
 #'   Adaptive MCMC, Journal of Computational and Graphical Statistics, 18:2,
 #'   349-367, DOI:

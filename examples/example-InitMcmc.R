@@ -1,7 +1,7 @@
 # Beta-binomial -----------------------------------------------------------
 ## Likelihood:
 ## x|theta ~ Binomial(n, theta)
-## Prior distribution:
+## Prior:
 ## theta ~ Unif(0, 1)
 
 theta.truth <- 0.75
@@ -30,7 +30,7 @@ legend("topleft", legend=c("Analytic posterior", "Simulation truth"),
 # Estimating mean with unknown variance -----------------------------------
 ## Likelihood:
 ## x|mu, sigma^2 ~ N(mu, sigma^2)
-## Prior distributions:
+## Prior:
 ## p(mu) \propto 1
 ## p(sigma^2) \propto 1/sigma^2
 
