@@ -53,6 +53,7 @@ LogDTheta <- function(theta, mu, sigma.2, y) {
     dlnorm(theta, mu, sqrt(sigma.2), log=TRUE) + dpois(y, theta, log=TRUE)
 }
 
+# Non-adaptive Metropolis sampler
 SampleTheta <- function(theta.vec, mu, sigma.2, y.vec, n.obs, s) {
     theta.prop <- exp(log(theta.vec) + rnorm(n.obs, 0, s))
     for(i in 1:n.obs) {

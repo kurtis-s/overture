@@ -40,9 +40,9 @@ rate is less than the target acceptance rate.
 
 \eqn{\delta(n)} is set to \eqn{\delta(n) = min(0.01, n^{-1/2})} unless
 re-specified in the function call. Some care should be taken if re-specifying
-\code{DeltaN}, as the ergodicity of the chain may not be preserved if
-certain conditions aren't met.  See Roberts & Rosenthal (2009) in the
-references for details.
+\code{DeltaN}, as the ergodicity of the chain may not be preserved if certain
+conditions aren't met.  See Roberts & Rosenthal (2009) in the references for
+details.
 
 \code{AdaptMetrop} keeps track of the the acceptance rate by comparing the
 previously sampled value from \code{f} to the next value.  If the two values
@@ -51,19 +51,21 @@ values are different the proposal is considered accepted. \code{AdaptMetrop},
 therefore, is intended to be used in cases where the target distribution is
 continuous and ties aren't possible.  Otherwise the calculated acceptance
 rate may be incorrect. For example, if the target distribution and the
-proposal distribution are discrete, it may be possible for the previous
-parameter value and the next parameter value to be the same, even if the
-proposal is accepted.
+proposal distribution are discrete, it may be possible for the previously
+sampled parameter value and the next parameter value to be the same, even if
+the proposal is accepted.
 
 The proposal standard deviation \code{s} can be either a vector or a scalar.
 If the initial value of \code{s} is a scalar, \eqn{f} will be treated as a
 sampler for a random vector or a joint parameter update.  Alternatively, if
 the dimension of \eqn{s} is equal to the dimension of the parameters returned
 by \eqn{f}, the individual elements \eqn{s} will be treated as individual
-proposal standard deviations for the elements of \eqn{f}.  This functionality
-can be used, for example, if \eqn{f} loops through each of its elements
-individually, updating each using Metropolis step.  In this case, \eqn{f}
-should contructed to receive \eqn{s} as a vector argument.
+proposal standard deviations for the elements returned by \eqn{f}.  This
+functionality can be used, for example, if \eqn{f} samples each of its
+returned elements individually, updating each element using a Metropolis
+step.  See the examples for an illustration of this use case.  In such
+settings, \eqn{f} should be contructed to receive \eqn{s} as a vector
+argument.
 }
 \examples{
 # Sample from N(1, 2^2) ---------------------------------------------------
@@ -121,6 +123,7 @@ LogDTheta <- function(theta, mu, sigma.2, y) {
     dlnorm(theta, mu, sqrt(sigma.2), log=TRUE) + dpois(y, theta, log=TRUE)
 }
 
+# Non-adaptive Metropolis sampler
 SampleTheta <- function(theta.vec, mu, sigma.2, y.vec, n.obs, s) {
     theta.prop <- exp(log(theta.vec) + rnorm(n.obs, 0, s))
     for(i in 1:n.obs) {

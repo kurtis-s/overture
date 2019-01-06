@@ -196,23 +196,7 @@ RemoveMissingDraws <- function(samps) {
 #' @param backing.path directory path of an in-progress MCMC
 #' @return list of \link{big.matrix} with samples from the partial MCMC run
 #' @examples
-#' \dontrun{
-#' SampleSomething <- function() {
-#'     Sys.sleep(0.3)
-#'     rnorm(1)
-#' }
-#'
-#' backing.path <- "/some/backing/path"
-#' slow.mcmc <- InitMcmc(1000, backing.path=backing.path)
-#' slow.mcmc({
-#'     x <- SampleSomething()
-#' })
-#'
-#' ### In another process, while the MCMC is still running
-#' backing.path <- "/some/backing/path"
-#' samples.so.far <- Peek(backing.path)
-#' samples.so.far$x[,]
-#' }
+#' @example examples/example-Peek.R
 #' @export
 #' @seealso \code{\link{InitMcmc}}, \code{\link{big.matrix}}
 Peek <- function(backing.path) {
