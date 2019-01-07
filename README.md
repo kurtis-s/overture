@@ -52,7 +52,7 @@ samples <- mcmc({
 [3,]  256
 ```
 ### Save samples on-disk
-To save samples on disk, just specify the directory where the samples should be saved:
+To save samples on disk, specify the directory where the samples should be saved:
 ```r
 mcmc <- InitMcmc(3, backing.path=/save/directory/path/)
 samples <- mcmc({
