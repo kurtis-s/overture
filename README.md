@@ -81,8 +81,8 @@ loaded.samples <- LoadMcmc(/save/directory/path/)
 
 To convert a file-backed MCMC into a list of R in-memory matrices, use `ToMemory`:
 ```r
-in.memory.samples <- ToMemory(loaded.samples)
-> in.memory.samples
+samples.in.memory <- ToMemory(loaded.samples)
+> samples.in.memory
 $x
      [,1] [,2]
 [1,]    1   11
