@@ -54,7 +54,7 @@ samples <- mcmc({
 ### Save samples on-disk
 To save samples on disk, specify the directory where the samples should be saved:
 ```r
-mcmc <- InitMcmc(3, backing.path=/save/directory/path/)
+mcmc <- InitMcmc(3, backing.path="/save/directory/path/")
 samples <- mcmc({
     x <- SampleX(x)
     y <- SampleY(y)
@@ -76,7 +76,7 @@ The samples can be analyzed as before:
 
 To load the samples from disk, use `LoadMcmc`:
 ```r
-loaded.samples <- LoadMcmc(/save/directory/path/)
+loaded.samples <- LoadMcmc("/save/directory/path/")
 ```
 
 To convert a file-backed MCMC into a list of R in-memory matrices, use `ToMemory`:
@@ -99,7 +99,7 @@ $y
 ### Monitor the progress of an MCMC while it's still running
 Samples from an MCMC can be viewed before its completion.  First, start the slow running MCMC as a file-backed chain:
 ```r
-slow.mcmc <- InitMcmc(10000, backing.path=/save/directory/path/)
+slow.mcmc <- InitMcmc(10000, backing.path="/save/directory/path/")
 slow.mcmc({
     x <- SlowSampler()
 })
@@ -107,7 +107,7 @@ slow.mcmc({
 
 Then, in another R process while the MCMC is still running, use `Peek` to load and analyze the samples taken so far:
 ```r
-samples.so.far <- Peek(/save/directory/path/)
+samples.so.far <- Peek("/save/directory/path/")
 samples.so.far$x[,]
 ```
 
