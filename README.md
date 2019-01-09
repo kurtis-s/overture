@@ -24,7 +24,7 @@ SampleY <- function(y) {
 ```
 #### 2.  Initialize the MCMC
 ```r
-mcmc <- InitMcmc(3) # Run the chain for 3 iterations
+Mcmc <- InitMcmc(3) # Run the chain for 3 iterations
 ```
 #### 3.  Set initial values for the chain
 ```r
@@ -33,7 +33,7 @@ y <- 2 # Initial value for y
 ```
 #### 4.  Run the MCMC
 ```r
-samples <- mcmc({
+samples <- Mcmc({
     x <- SampleX(x)
     y <- SampleY(y)
 })
@@ -54,8 +54,8 @@ samples <- mcmc({
 ### Save samples on-disk
 To save samples on disk, specify the directory where the samples should be saved:
 ```r
-mcmc <- InitMcmc(3, backing.path="/save/directory/path/")
-samples <- mcmc({
+Mcmc <- InitMcmc(3, backing.path="/save/directory/path/")
+samples <- Mcmc({
     x <- SampleX(x)
     y <- SampleY(y)
 })
@@ -99,8 +99,8 @@ $y
 ### Monitor the progress of an MCMC while it's still running
 Samples from an MCMC can be viewed before its completion.  First, start the slow running MCMC as a file-backed chain:
 ```r
-slow.mcmc <- InitMcmc(10000, backing.path="/save/directory/path/")
-slow.mcmc({
+SlowMcmc <- InitMcmc(10000, backing.path="/save/directory/path/")
+SlowMcmc({
     x <- SlowSampler()
 })
 ```

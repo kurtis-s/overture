@@ -14,10 +14,10 @@ test_that("MCMC samples saved", {
     iter <- 3
     test.dir <- TestDir()
 
-    mcmc <- InitMcmc(iter, test.dir)
+    Mcmc <- InitMcmc(iter, test.dir)
     x <- c(0, 0)
     y <- 0
-    samps <- mcmc({
+    samps <- Mcmc({
         x <- c(1, 2)
         y <- 1
     })
@@ -30,8 +30,8 @@ test_that("Out of memory MCMC is file backed", {
     iter <- 1
     test.dir <- TestDir()
 
-    mcmc <- InitMcmc(iter, test.dir)
-    samps <- mcmc({
+    Mcmc <- InitMcmc(iter, test.dir)
+    samps <- Mcmc({
         x <- 1
     })
 
@@ -41,8 +41,8 @@ test_that("Out of memory MCMC is file backed", {
 test_that("In memory MCMC is not file backed", {
     iter <- 1
 
-    mcmc <- InitMcmc(iter)
-    samps <- mcmc({
+    Mcmc <- InitMcmc(iter)
+    samps <- Mcmc({
         x <- 1
     })
 
@@ -54,9 +54,9 @@ test_that("Thinning works", {
     thin <- 2
     test.dir <- TestDir()
 
-    mcmc <- InitMcmc(iter, test.dir, thin)
+    Mcmc <- InitMcmc(iter, test.dir, thin)
     x <- 0
-    samps <- mcmc({
+    samps <- Mcmc({
         x <- x + 1
     })
 
@@ -67,11 +67,11 @@ test_that("Non-numeric assignments aren't saved", {
     iter <- 3
     test.dir <- TestDir()
 
-    mcmc <- InitMcmc(iter, test.dir)
+    Mcmc <- InitMcmc(iter, test.dir)
     x <- 0
     y <- c("char1", "char2")
     z <- "char3"
-    samps <- mcmc({
+    samps <- Mcmc({
         x <- 1
         y <- c("testchar1", "testchar2")
         z <- "testchar3"
@@ -108,8 +108,8 @@ test_that("Excluded assignments aren't saved", {
     iter <- 1
     test.dir <- TestDir()
 
-    mcmc <- InitMcmc(iter, test.dir, exclude="x")
-    samps <- mcmc({
+    Mcmc <- InitMcmc(iter, test.dir, exclude="x")
+    samps <- Mcmc({
         x <- 1
         y <- 1
     })
@@ -130,8 +130,8 @@ test_that("Error thrown if saving on-disk but 'bigmemory' not installed", {
     mockery::expect_call(m, 1, requireNamespace("bigmemory", quietly=TRUE))
 
     # Saving in-memory still works
-    mcmc <- InitMcmc(iter)
-    samps <- mcmc({
+    Mcmc <- InitMcmc(iter)
+    samps <- Mcmc({
         x <- 1
     })
     expect_equivalent(samps$x, rep(1, iter))
@@ -142,14 +142,14 @@ test_that("Matrix assignments are saved successfully", {
     test.dir <- TestDir()
     expected.save.result <- matrix(rep(1:4, times=iter), nrow=2, byrow=TRUE)
 
-    mcmc1 <- InitMcmc(iter, test.dir)
-    samps1 <- mcmc1({
+    Mcmc1 <- InitMcmc(iter, test.dir)
+    samps1 <- Mcmc1({
         x <- matrix(expected.save.result[1,], nrow=2)
     })
     expect_equivalent(samps1$x[,], expected.save.result)
 
-    mcmc2 <- InitMcmc(iter)
-    samps2 <- mcmc2({
+    Mcmc2 <- InitMcmc(iter)
+    samps2 <- Mcmc2({
         x <- matrix(expected.save.result[1,], nrow=2)
     })
     expect_equivalent(samps2$x, expected.save.result)
@@ -160,14 +160,14 @@ test_that("Array assignments are saved successfully", {
     test.dir <- TestDir()
     expected.save.result <- matrix(rep(1:6, each=2), nrow=2)
 
-    mcmc1 <- InitMcmc(iter, test.dir)
-    samps1 <- mcmc1({
+    Mcmc1 <- InitMcmc(iter, test.dir)
+    samps1 <- Mcmc1({
         x <- array(1:6, dim=c(1, 2, 3))
     })
     expect_equivalent(samps1$x[,], expected.save.result)
 
-    mcmc2 <- InitMcmc(iter)
-    samps2 <- mcmc2({
+    Mcmc2 <- InitMcmc(iter)
+    samps2 <- Mcmc2({
         x <- array(1:6, dim=c(1, 2, 3))
     })
     expect_equivalent(samps2$x, expected.save.result)
@@ -177,8 +177,8 @@ test_that("Completed file-backed MCMC can be loaded back into R", {
     iter <- 2
     test.dir <- TestDir()
 
-    mcmc <- InitMcmc(iter, test.dir)
-    samps <- mcmc({
+    Mcmc <- InitMcmc(iter, test.dir)
+    samps <- Mcmc({
         x <- 1
         y <- 2
     })
@@ -213,10 +213,10 @@ test_that("ToMemory converts MCMC samples to in-memory", {
     iter <- 3
     test.dir <- TestDir()
 
-    mcmc <- InitMcmc(iter, test.dir)
+    Mcmc <- InitMcmc(iter, test.dir)
     x <- c(0, 0)
     y <- 0
-    samps <- mcmc({
+    samps <- Mcmc({
         x <- c(1, 2)
         y <- 1
     })
@@ -242,9 +242,9 @@ test_that("File-backed MCMC is flushed on exit", {
     test.dir <- TestDir()
 
     m <- mockery::mock(TRUE, TRUE)
-    mcmc <- InitMcmc(iter, test.dir)
+    Mcmc <- InitMcmc(iter, test.dir)
     with_mock(flush = m,
-              samps <- mcmc({ x <- c(1, 2)
+              samps <- Mcmc({ x <- c(1, 2)
                               y <- 1 }),
               .env="bigmemory")
 
@@ -260,9 +260,9 @@ test_that("Warning given if file-backed MCMC fails to flush on exit", {
         "Failed to flush big.matrix, some samples may not be saved on-disk"
 
     m <- mockery::mock(FALSE)
-    mcmc <- InitMcmc(iter, test.dir)
+    Mcmc <- InitMcmc(iter, test.dir)
     expect_warning(with_mock(flush = m,
-                             samps <- mcmc({ x <- c(1, 2)}),
+                             samps <- Mcmc({ x <- c(1, 2)}),
                              .env="bigmemory"),
                    flush.failed.warning.msg)
     mockery::expect_called(m, 1)

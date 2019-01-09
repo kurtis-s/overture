@@ -5,8 +5,8 @@ SampleSomething <- function() {
 }
 
 backing.path <- "/some/backing/path"
-slow.mcmc <- InitMcmc(1000, backing.path=backing.path)
-slow.mcmc({
+SlowMcmc <- InitMcmc(1000, backing.path=backing.path)
+SlowMcmc({
     x <- SampleSomething()
 })
 

@@ -84,10 +84,10 @@ s.start <- 0.1
 g <- AdaptMetrop(f, s.start, batch.size=25)
 
 n.save <- 10000
-mcmc <- InitMcmc(n.save)
+Mcmc <- InitMcmc(n.save)
 y <- 0
 x <- 0
-samples <- mcmc({
+samples <- Mcmc({
     y <- f(y, s.start) # Non-adaptive
     x <- g(x) # Adaptive
 })
@@ -162,8 +162,8 @@ theta.vec <- y.vec
 mu <- m
 
 ## MCMC
-mcmc <- InitMcmc(10000)
-samples <- mcmc({
+Mcmc <- InitMcmc(10000)
+samples <- Mcmc({
     sigma.2 <-  SampleSigma2(theta.vec, mu, a, b, n.obs)
     mu <- SampleMu(theta.vec, sigma.2, m, v.2, n.obs)
     theta.vec <- SampleThetaAdapative(theta.vec, mu, sigma.2, y.vec, n.obs)

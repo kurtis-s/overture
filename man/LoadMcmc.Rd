@@ -24,8 +24,8 @@ in the MCMC's \code{backing.path} directory.
 # Run a file-backed MCMC
 backing.path <- tempfile()
 dir.create(backing.path)
-mcmc <- InitMcmc(1000, backing.path=backing.path)
-samples <- mcmc({
+Mcmc <- InitMcmc(1000, backing.path=backing.path)
+samples <- Mcmc({
     x <- rnorm(1)
 })
 rm(samples)

@@ -81,8 +81,8 @@ SampleTheta <- function() {
 }
 
 # MCMC
-mcmc <- InitMcmc(1000)
-samples <- mcmc({
+Mcmc <- InitMcmc(1000)
+samples <- Mcmc({
     theta <- SampleTheta()
 })
 
@@ -118,9 +118,9 @@ SampleSigma2 <- function(mu) {
 }
 
 # MCMC
-mcmc <- InitMcmc(1000, thin=10, exclude="sigma.2")
+Mcmc <- InitMcmc(1000, thin=10, exclude="sigma.2")
 sigma.2 <- 1 # Initialize parameter
-samples <- mcmc({
+samples <- Mcmc({
     mu <- SampleMu(sigma.2)
     sigma.2 <- SampleSigma2(mu)
 })
@@ -176,8 +176,8 @@ SampleSigma2 <- function() {
 # MCMC, samples saved on-disk
 backing.path <- tempfile()
 dir.create(backing.path)
-mcmc <- InitMcmc(1000, backing.path=backing.path)
-samples <- mcmc({
+Mcmc <- InitMcmc(1000, backing.path=backing.path)
+samples <- Mcmc({
     sigma.2 <- SampleSigma2()
     beta <- SampleBeta(sigma.2)
 })
