@@ -97,34 +97,32 @@ AdaptMetrop <- function(f, s, batch.size=50, target=0.44, DeltaN) {
     accept.rate <- NA
     prev <- NA
     s <- s
-    local({
-        function(...) {
-            if(n.iters==0) {
-                prev <- f(..., s)
-                if(!((length(s)==1) || (length(s)==length(prev)))) {
-                    stop("length(s) should be 1 or length(f(..., s))")
-                }
+    function(...) {
+        if(n.iters==0) {
+            prev <- f(..., s)
+            if(!((length(s)==1) || (length(s)==length(prev)))) {
+                stop("length(s) should be 1 or length(f(..., s))")
             }
-
-            ret <- f(..., s)
-            n.iters <<- n.iters + 1
-            if(length(s) > 1) { # Univariate updates for each component in ret
-                n.accepted <<- n.accepted + (ret != prev)
-            }
-            else { # Scalar/random vector/joint update
-                n.accepted <<- n.accepted + all(ret != prev)
-            }
-            accept.rate <<- n.accepted/n.iters
-            prev <<- ret
-            if(n.iters %% batch.size == 0) {
-                delta.n <- DeltaN(n.iters)
-                s <<- ifelse(accept.rate > target,
-                             s*exp(delta.n),
-                             s*exp(-delta.n))
-            }
-
-            return(ret)
         }
-    })
+
+        ret <- f(..., s)
+        n.iters <<- n.iters + 1
+        if(length(s) > 1) { # Univariate updates for each component in ret
+            n.accepted <<- n.accepted + (ret != prev)
+        }
+        else { # Scalar/random vector/joint update
+            n.accepted <<- n.accepted + all(ret != prev)
+        }
+        accept.rate <<- n.accepted/n.iters
+        prev <<- ret
+        if(n.iters %% batch.size == 0) {
+            delta.n <- DeltaN(n.iters)
+            s <<- ifelse(accept.rate > target,
+                         s*exp(delta.n),
+                         s*exp(-delta.n))
+        }
+
+        return(ret)
+    }
 }
 
