@@ -11,7 +11,7 @@ f <- function(x, s) { # Non-adaptive Metropolis sampler
 }
 
 s.start <- 0.1
-g <- AdaptMetrop(f, s.start, batch.size=25)
+g <- Amwg(f, s.start, batch.size=25)
 
 n.save <- 10000
 Mcmc <- InitMcmc(n.save)
@@ -79,7 +79,7 @@ n.obs <- length(y.vec)
 s <- rep(1, n.obs)
 # s is a vector, so the acceptance rate of each component will be tracked
 # individually in the adaptive Metropolis sampler
-SampleThetaAdapative <- AdaptMetrop(SampleTheta, s)
+SampleThetaAdapative <- Amwg(SampleTheta, s)
 
 ## Set prior
 v.2 <- 0.05

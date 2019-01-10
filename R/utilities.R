@@ -33,19 +33,19 @@ DeltaNDefault <- function(n) {
 
 #' Turn a non-adaptive Metropolis sampler into an adaptive Metropolis sampler
 #'
-#' Given a non-adpative sampler of the form f(..., s), \code{AdaptMetrop} will
-#' return a function g(...) that automatically adapts the Metropolis proposal
-#' standard deviation s to try and acheive a target acceptance rate.
+#' Given a non-adpative sampler of the form f(..., s), \code{Amwg} will return a
+#' function g(...) that automatically adapts the Metropolis proposal standard
+#' deviation s to try and acheive a target acceptance rate.
 #'
-#' \code{AdaptMetrop} uses the algorithm from Roberts & Rosenthal (2009), which
-#' re-scales the proposal standard deviation after a fixed number of MCMC
-#' iterations have elapsed.  The goal of the algorithm is to acheive a target
-#' acceptance rate for the Metropolis step.  After the n\emph{th} batch of MCMC
-#' iterations the log of the proposal standard deviation, \eqn{log(s)}, is
-#' increased/decreased by \eqn{\delta(n)}.  \eqn{log(s)} is increased by
-#' \eqn{\delta(n)} if the observed acceptance rate is more than the target
-#' acceptance rate, or decreased by \eqn{\delta(n)} if the observed acceptance
-#' rate is less than the target acceptance rate.
+#' \code{Amwg} uses the Adaptive Metropolis-Within-Gibbs algorithm from Roberts
+#' & Rosenthal (2009), which re-scales the proposal standard deviation after a
+#' fixed number of MCMC iterations have elapsed.  The goal of the algorithm is
+#' to acheive a target acceptance rate for the Metropolis step.  After the
+#' n\emph{th} batch of MCMC iterations the log of the proposal standard
+#' deviation, \eqn{log(s)}, is increased/decreased by \eqn{\delta(n)}.
+#' \eqn{log(s)} is increased by \eqn{\delta(n)} if the observed acceptance rate
+#' is more than the target acceptance rate, or decreased by \eqn{\delta(n)} if
+#' the observed acceptance rate is less than the target acceptance rate.
 #'
 #' \code{DeltaN} is set to \eqn{\delta(n) = min(0.01, n^{-1/2})} unless
 #' re-specified in the function call. Some care should be taken if re-specifying
@@ -53,10 +53,10 @@ DeltaNDefault <- function(n) {
 #' conditions aren't met.  See Roberts & Rosenthal (2009) in the references for
 #' details.
 #'
-#' \code{AdaptMetrop} keeps track of the the acceptance rate by comparing the
+#' \code{Amwg} keeps track of the the acceptance rate by comparing the
 #' previously sampled value from \code{f} to the next value.  If the two values
 #' are equal, the proposal is considered to be rejected, whereas if the two
-#' values are different the proposal is considered accepted. \code{AdaptMetrop},
+#' values are different the proposal is considered accepted. \code{Amwg},
 #' therefore, is intended to be used in cases where the target distribution is
 #' continuous and ties aren't possible; otherwise the calculated acceptance rate
 #' may be incorrect. For example, if the target distribution and the proposal
@@ -87,9 +87,9 @@ DeltaNDefault <- function(n) {
 #'   Adaptive MCMC, Journal of Computational and Graphical Statistics, 18:2,
 #'   349-367, DOI:
 #'   \href{https://doi.org/10.1198/jcgs.2009.06134}{10.1198/jcgs.2009.06134}
-#' @example examples/example-AdaptMetrop.R
+#' @example examples/example-Amwg.R
 #' @export
-AdaptMetrop <- function(f, s, batch.size=50, target=0.44, DeltaN) {
+Amwg <- function(f, s, batch.size=50, target=0.44, DeltaN) {
     if(missing(DeltaN)) DeltaN <- DeltaNDefault
     n.iters <- 0
     n.accepted <- rep(0, length(s))
