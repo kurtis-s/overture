@@ -41,13 +41,13 @@ DeltaNDefault <- function(n) {
 #' re-scales the proposal standard deviation after a fixed number of MCMC
 #' iterations have elapsed.  The goal of the algorithm is to acheive a target
 #' acceptance rate for the Metropolis step.  After the n\emph{th} batch of MCMC
-#' iterations the proposal standard deviation, \eqn{log(s)}, is
+#' iterations the log of the proposal standard deviation, \eqn{log(s)}, is
 #' increased/decreased by \eqn{\delta(n)}.  \eqn{log(s)} is increased by
 #' \eqn{\delta(n)} if the observed acceptance rate is more than the target
 #' acceptance rate, or decreased by \eqn{\delta(n)} if the observed acceptance
 #' rate is less than the target acceptance rate.
 #'
-#' \eqn{\delta(n)} is set to \eqn{\delta(n) = min(0.01, n^{-1/2})} unless
+#' \code{DeltaN} is set to \eqn{\delta(n) = min(0.01, n^{-1/2})} unless
 #' re-specified in the function call. Some care should be taken if re-specifying
 #' \code{DeltaN}, as the ergodicity of the chain may not be preserved if certain
 #' conditions aren't met.  See Roberts & Rosenthal (2009) in the references for
@@ -58,22 +58,22 @@ DeltaNDefault <- function(n) {
 #' are equal, the proposal is considered to be rejected, whereas if the two
 #' values are different the proposal is considered accepted. \code{AdaptMetrop},
 #' therefore, is intended to be used in cases where the target distribution is
-#' continuous and ties aren't possible.  Otherwise the calculated acceptance
-#' rate may be incorrect. For example, if the target distribution and the
-#' proposal distribution are discrete, it may be possible for the previously
-#' sampled parameter value and the next parameter value to be the same, even if
-#' the proposal is accepted.
+#' continuous and ties aren't possible; otherwise the calculated acceptance rate
+#' may be incorrect. For example, if the target distribution and the proposal
+#' distribution are discrete, it may be possible for the previously sampled
+#' parameter value and the next parameter value to be the same, even if the
+#' proposal is accepted.
 #'
 #' The proposal standard deviation \code{s} can be either a vector or a scalar.
 #' If the initial value of \code{s} is a scalar, \eqn{f} will be treated as a
-#' sampler for a random vector or a joint parameter update.  Alternatively, if
-#' the dimension of \eqn{s} is equal to the dimension of the parameters returned
-#' by \eqn{f}, the individual elements \eqn{s} will be treated as individual
-#' proposal standard deviations for the elements returned by \eqn{f}.  This
-#' functionality can be used, for example, if \eqn{f} samples each of its
-#' returned elements individually, updating each element using a Metropolis
-#' step.  See the examples for an illustration of this use case.  In such
-#' settings, \eqn{f} should be contructed to receive \eqn{s} as a vector
+#' sampler for a scalar, a random vector, or a joint parameter update.
+#' Alternatively, if the dimension of \eqn{s} is equal to the dimension of the
+#' parameters returned by \eqn{f}, the individual elements \eqn{s} will be
+#' treated as individual proposal standard deviations for the elements returned
+#' by \eqn{f}.  This functionality can be used, for example, if \eqn{f} samples
+#' each of its returned elements individually, updating each element using a
+#' Metropolis step.  See the examples for an illustration of this use case.  In
+#' such settings, \eqn{f} should be contructed to receive \eqn{s} as a vector
 #' argument.
 #'
 #' @param f non-adaptive Metropolis sampler of the form f(..., s)
@@ -81,8 +81,7 @@ DeltaNDefault <- function(n) {
 #' @param batch.size number of iterations before proposal SD is adapted
 #' @param target target acceptance rate
 #' @param DeltaN function of the form f(n) which returns the adaptation amount
-#'   based on the number of elapsed iterations, n.  Defaults to min(0.01,
-#'   n^{-1/2}) if not specified.
+#'   based on the number of elapsed iterations, n
 #' @return Adaptive Metropolis sampler function of the form g(...).
 #' @references  Gareth O. Roberts & Jeffrey S. Rosenthal (2009) Examples of
 #'   Adaptive MCMC, Journal of Computational and Graphical Statistics, 18:2,
