@@ -66,8 +66,8 @@ SampleX <- function(x) { # Draw once from the target distribution
 n.samples <- 10000
 samples <- vector(length=n.samples)
 x <- 0.5
-mcmc <- InitMcmc(n.samples)
-samples <- mcmc({
+Mcmc <- InitMcmc(n.samples)
+samples <- Mcmc({
     x <- SampleX(x)
 })
 

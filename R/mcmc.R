@@ -195,7 +195,6 @@ RemoveMissingDraws <- function(samps) {
 #'
 #' @param backing.path directory path of an in-progress MCMC
 #' @return list of \link{big.matrix} with samples from the partial MCMC run
-#' @examples
 #' @example examples/example-Peek.R
 #' @export
 #' @seealso \code{\link{InitMcmc}}, \code{\link{big.matrix}}

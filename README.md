@@ -1,17 +1,17 @@
-# overature
-[![Build Status](https://travis-ci.org/kurtis-s/overature.svg?branch=master)](https://travis-ci.org/kurtis-s/overature)
-[![Coverage status](https://codecov.io/gh/kurtis-s/overature/branch/master/graph/badge.svg)](https://codecov.io/github/kurtis-s/overature?branch=master)
+# overture
+[![Build Status](https://travis-ci.org/kurtis-s/overture.svg?branch=master)](https://travis-ci.org/kurtis-s/overture)
+[![Coverage status](https://codecov.io/gh/kurtis-s/overture/branch/master/graph/badge.svg)](https://codecov.io/github/kurtis-s/overture?branch=master)
 
-`overature` makes writing Markov chain Monte Carlo (MCMC) samplers simpler.  With overature you can:
+`overture` makes writing Markov chain Monte Carlo (MCMC) samplers simpler.  With overture you can:
 
-* **Write less code** `overature` eliminates boilerplate code, looping through sampling functions and saving the results automatically.
+* **Write less code** `overture` eliminates boilerplate code, looping through sampling functions and saving the results automatically.
 * **Easily recover from interruptions** Samples can be saved on-disk as the MCMC runs, so it's easy to resume an MCMC if something goes wrong.
 * **Run more chains in parallel** Saving samples on-disk results in a dramatically smaller memory footprint for high-dimensional models, allowing more chains to be run when available RAM is limited.
 * **Monitor chain progress** Samples can be viewed in another R process while the MCMC is still running.
 
 ## Usage
 ### Basic Usage
-Using `overature` is easy:
+Using `overture` is easy:
 #### 1. Write the sampling functions
 ```r
 SampleX <- function(x) {
@@ -24,7 +24,7 @@ SampleY <- function(y) {
 ```
 #### 2.  Initialize the MCMC
 ```r
-mcmc <- InitMcmc(3) # Run the chain for 3 iterations
+Mcmc <- InitMcmc(3) # Run the chain for 3 iterations
 ```
 #### 3.  Set initial values for the chain
 ```r
@@ -33,7 +33,7 @@ y <- 2 # Initial value for y
 ```
 #### 4.  Run the MCMC
 ```r
-samples <- mcmc({
+samples <- Mcmc({
     x <- SampleX(x)
     y <- SampleY(y)
 })
@@ -54,8 +54,8 @@ samples <- mcmc({
 ### Save samples on-disk
 To save samples on disk, specify the directory where the samples should be saved:
 ```r
-mcmc <- InitMcmc(3, backing.path="/save/directory/path/")
-samples <- mcmc({
+Mcmc <- InitMcmc(3, backing.path="/save/directory/path/")
+samples <- Mcmc({
     x <- SampleX(x)
     y <- SampleY(y)
 })
@@ -99,8 +99,8 @@ $y
 ### Monitor the progress of an MCMC while it's still running
 Samples from an MCMC can be viewed before its completion.  First, start the slow running MCMC as a file-backed chain:
 ```r
-slow.mcmc <- InitMcmc(10000, backing.path="/save/directory/path/")
-slow.mcmc({
+SlowMcmc <- InitMcmc(10000, backing.path="/save/directory/path/")
+SlowMcmc({
     x <- SlowSampler()
 })
 ```
@@ -118,5 +118,5 @@ More examples and details are given in the package documentation.
 After installing [devtools](https://github.com/r-lib/devtools) run:
 ```r
 library(devtools)
-install_github("kurtis-s/overature")
+install_github("kurtis-s/overture")
 ```

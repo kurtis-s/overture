@@ -17,7 +17,7 @@ test_that("AcceptProposal works", {
     expect_false(AcceptProposal(log(2), log(1), log(2), log(1)))
 })
 
-test_that("AdaptMetrop increases/decreases proposal sd in vector setting", {
+test_that("Amwg increases/decreases proposal sd in vector setting", {
     batch.size <- 3
     s.start <- c(10, 10)
     m <- mockery::mock(c(1, 1),
@@ -30,7 +30,7 @@ test_that("AdaptMetrop increases/decreases proposal sd in vector setting", {
                            exp(log(s.start[2]) + kDelta.n))
 
     f <- function(s) m()
-    g <- AdaptMetrop(f, s.start, batch.size=batch.size)
+    g <- Amwg(f, s.start, batch.size=batch.size)
     # No update yet until batch.size reached
     g()
     expect_equal(get("s", envir=environment(g)), s.start)
@@ -42,7 +42,7 @@ test_that("AdaptMetrop increases/decreases proposal sd in vector setting", {
     expect_equal(get("s", envir=environment(g)), s.expected.update)
 })
 
-test_that("AdaptMetrop decreases proposal sd in univariate setting", {
+test_that("Amwg decreases proposal sd in univariate setting", {
     batch.size <- 3
     s.start <- 10
     m <- mockery::mock(1, 1, 1, 1)
@@ -50,7 +50,7 @@ test_that("AdaptMetrop decreases proposal sd in univariate setting", {
     s.expected.update <- exp(log(s.start[1]) - kDelta.n)
 
     f <- function(s) m()
-    g <- AdaptMetrop(f, s.start, batch.size=batch.size)
+    g <- Amwg(f, s.start, batch.size=batch.size)
     # No update yet until batch.size reached
     g()
     expect_equal(get("s", envir=environment(g)), s.start)
@@ -62,7 +62,7 @@ test_that("AdaptMetrop decreases proposal sd in univariate setting", {
     expect_equal(get("s", envir=environment(g)), s.expected.update)
 })
 
-test_that("AdaptMetrop increases proposal sd in univariate setting", {
+test_that("Amwg increases proposal sd in univariate setting", {
     batch.size <- 3
     s.start <- 10
     m <- mockery::mock(1, 2, 3, 4)
@@ -70,7 +70,7 @@ test_that("AdaptMetrop increases proposal sd in univariate setting", {
     s.expected.update <- exp(log(s.start[1]) + kDelta.n)
 
     f <- function(s) m()
-    g <- AdaptMetrop(f, s.start, batch.size=batch.size)
+    g <- Amwg(f, s.start, batch.size=batch.size)
     # No update yet until batch.size reached
     g()
     expect_equal(get("s", envir=environment(g)), s.start)
@@ -82,13 +82,13 @@ test_that("AdaptMetrop increases proposal sd in univariate setting", {
     expect_equal(get("s", envir=environment(g)), s.expected.update)
 })
 
-test_that("AdaptMetrop works when batch size is 1", {
+test_that("Amwg works when batch size is 1", {
     batch.size <- 1
     s.start <- 10
     m <- mockery::mock(1, 1, 2)
 
     f <- function(s) m()
-    g <- AdaptMetrop(f, s.start, batch.size=batch.size)
+    g <- Amwg(f, s.start, batch.size=batch.size)
 
     # Low acceptance, decrease proposal sd
     g()
@@ -101,15 +101,15 @@ test_that("AdaptMetrop works when batch size is 1", {
                  exp(log(s.curr) + kDelta.n))
 })
 
-test_that("AdaptMetrop stops if the proposal sd is the wrong length", {
+test_that("Amwg stops if the proposal sd is the wrong length", {
     batch.size <- 1
     s.start <- c(10, 10)
     f <- function(s) rnorm(3, 0, s)
-    g <- AdaptMetrop(f, s.start, batch.size=batch.size)
+    g <- Amwg(f, s.start, batch.size=batch.size)
     expect_error(g(), "length(s) should be 1 or length(f(..., s))", fixed=TRUE)
 })
 
-test_that("AdaptMetrop can handle random vectors/joint updates", {
+test_that("Amwg can handle random vectors/joint updates", {
     batch.size <- 2
     s.start <- 10
     f <- mockery::mock(c(1, 1),
@@ -118,7 +118,7 @@ test_that("AdaptMetrop can handle random vectors/joint updates", {
     # High acceptance rate, expect increased proposal sd
     s.expected.update <- exp(log(s.start) + kDelta.n)
 
-    g <- AdaptMetrop(f, s.start, batch.size=batch.size)
+    g <- Amwg(f, s.start, batch.size=batch.size)
     # No change before batch length iterations
     g()
     expect_equal(get("s", envir=environment(g)), s.start)
@@ -134,7 +134,7 @@ test_that("Default DeltaN is applied correctly", {
     s.start <- 10
     m <- mockery::mock(1, cycle=TRUE)
     f <- function(s) m()
-    g <- AdaptMetrop(f, s.start, batch.size=batch.size)
+    g <- Amwg(f, s.start, batch.size=batch.size)
 
     # While the min is 0.01, before the switch
     for(i in 1:iters.before.switch) {
@@ -159,7 +159,7 @@ test_that("Custom DeltaN is applied correctly", {
     s.start <- 10
     m <- mockery::mock(1, cycle=TRUE)
     f <- function(s) m()
-    g <- AdaptMetrop(f, s.start, batch.size=batch.size, DeltaN=DeltaN)
+    g <- Amwg(f, s.start, batch.size=batch.size, DeltaN=DeltaN)
 
     # While the min is 0.05, before the switch
     for(i in 1:iters.before.switch) {
