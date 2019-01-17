@@ -172,6 +172,5 @@ samples <- Mcmc({
 \references{
 Gareth O. Roberts & Jeffrey S. Rosenthal (2009) Examples of
   Adaptive MCMC, Journal of Computational and Graphical Statistics, 18:2,
-  349-367, DOI:
-  \href{https://doi.org/10.1198/jcgs.2009.06134}{10.1198/jcgs.2009.06134}
+  349-367, \doi{10.1198/jcgs.2009.06134}
 }

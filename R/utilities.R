@@ -85,8 +85,8 @@ DeltaNDefault <- function(n) {
 #' @return Adaptive Metropolis sampler function of the form g(...).
 #' @references  Gareth O. Roberts & Jeffrey S. Rosenthal (2009) Examples of
 #'   Adaptive MCMC, Journal of Computational and Graphical Statistics, 18:2,
-#'   349-367, DOI:
-#'   \href{https://doi.org/10.1198/jcgs.2009.06134}{10.1198/jcgs.2009.06134}
+#'   349-367, \doi{10.1198/jcgs.2009.06134}
+#'
 #' @example examples/example-Amwg.R
 #' @export
 Amwg <- function(f, s, batch.size=50, target=0.44, DeltaN) {
