@@ -267,3 +267,19 @@ test_that("Warning given if file-backed MCMC fails to flush on exit", {
                    flush.failed.warning.msg)
     mockery::expect_called(m, 1)
 })
+
+test_that("Peek doesn't fail in the MCMC is complete", {
+    n.iter <- 5
+    SampleSomething <- function() 1
+
+    backing.path <- TestDir()
+
+    Mcmc <- InitMcmc(n.iter, backing.path=backing.path)
+    Mcmc({
+        x <- SampleSomething()
+    })
+
+    samples.so.far <- Peek(backing.path)
+    expect_equivalent(samples.so.far$x[,], rep(1, n.iter))
+})
+
