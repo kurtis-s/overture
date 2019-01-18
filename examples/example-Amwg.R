@@ -37,7 +37,7 @@ legend("bottomleft", legend=c("Adaptive", "Non-adaptive"),
 ## mu ~ Normal(m, v^2), m and v^2 fixed
 ## sigma^2 ~ InverseGamma(a, b), a and b fixed
 
-\dontrun{
+\donttest{
 SampleSigma2 <- function(theta.vec, mu, a, b, n.obs) {
     1/rgamma(1, a + n.obs/2, b + (1/2)*sum((log(theta.vec) - mu)^2))
 }
@@ -94,7 +94,7 @@ mu <- m
 ## MCMC
 Mcmc <- InitMcmc(10000)
 samples <- Mcmc({
-    sigma.2 <-  SampleSigma2(theta.vec, mu, a, b, n.obs)
+    sigma.2 <- SampleSigma2(theta.vec, mu, a, b, n.obs)
     mu <- SampleMu(theta.vec, sigma.2, m, v.2, n.obs)
     theta.vec <- SampleThetaAdapative(theta.vec, mu, sigma.2, y.vec, n.obs)
 })
