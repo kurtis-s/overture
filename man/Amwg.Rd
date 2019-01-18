@@ -163,7 +163,7 @@ mu <- m
 ## MCMC
 Mcmc <- InitMcmc(10000)
 samples <- Mcmc({
-    sigma.2 <-  SampleSigma2(theta.vec, mu, a, b, n.obs)
+    sigma.2 <- SampleSigma2(theta.vec, mu, a, b, n.obs)
     mu <- SampleMu(theta.vec, sigma.2, m, v.2, n.obs)
     theta.vec <- SampleThetaAdapative(theta.vec, mu, sigma.2, y.vec, n.obs)
 })
