@@ -19,20 +19,22 @@ the chain's convergence can be monitored before the MCMC chain has finished
 running.
 }
 \examples{
-\dontrun{
+\donttest{
 SampleSomething <- function() {
     Sys.sleep(0.3)
     rnorm(1)
 }
 
-backing.path <- "/some/backing/path"
+backing.path <- tempfile()
+dir.create(backing.path)
+print(backing.path)
+
 SlowMcmc <- InitMcmc(1000, backing.path=backing.path)
 SlowMcmc({
     x <- SampleSomething()
 })
 
-### In another process, while the MCMC is still running
-backing.path <- "/some/backing/path"
+### In another R process, while the MCMC is still running...
 samples.so.far <- Peek(backing.path)
 samples.so.far$x[,]
 }
