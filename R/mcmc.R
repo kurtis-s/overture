@@ -193,16 +193,29 @@ LoadMcmc <- function(backing.path) {
 }
 
 RemoveMissingDraws <- function(samps) {
-    first.missing.idxs <- vector(length=length(samps))
+    first.miss.idxs <- vector(length=length(samps))
     for(i in 1:length(samps)) {
         param.curr <- samps[[i]]
-        first.missing.idxs[i] <- which.max(is.na(param.curr[, ncol(param.curr)]))
-    }
-    last.available.sample <- min(first.missing.idxs) - 1
+        last.col.idx <- ncol(param.curr)
+        na.ind <- is.na(param.curr[, last.col.idx])
 
-    samps.subsetted <- lapply(samps, function(x) {
-        bigmemory::sub.big.matrix(x, lastRow=last.available.sample)
-    })
+        if(all(!na.ind)) { # No values are missing for this parameter
+            first.miss.idxs[i] <- NA
+        }
+        else {
+            first.miss.idxs[i] <- which.max(is.na(param.curr[, last.col.idx]))
+        }
+    }
+
+    if(all(is.na(first.miss.idxs))) { # No missing values, MCMC is finished
+        samps.subsetted <- samps
+    }
+    else {
+        last.available.sample <- min(first.miss.idxs) - 1
+        samps.subsetted <- lapply(samps, function(x) {
+            bigmemory::sub.big.matrix(x, lastRow=last.available.sample)
+        })
+    }
 
     return(samps.subsetted)
 }

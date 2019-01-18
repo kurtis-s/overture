@@ -21,7 +21,7 @@ running.
 \examples{
 \donttest{
 SampleSomething <- function() {
-    Sys.sleep(0.3)
+    Sys.sleep(0.1)
     rnorm(1)
 }
 
