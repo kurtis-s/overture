@@ -16,6 +16,20 @@ InitSampMat <- function(samps, var, var.name, n.save, backing.path) {
     return(samps)
 }
 
+InitSampMats <- function(envir, samps, n.save, backing.path, exclude) {
+    for(var.name in ls(envir)) {
+        if(ShouldSave(var.name, exclude, envir)) {
+            # If it hasn't been done already, allocate storage for samples
+            if(is.null(samps[[var.name]])) {
+                samps <- InitSampMat(samps, envir[[var.name]], var.name, n.save,
+                                     backing.path)
+            }
+        }
+    }
+
+    return(samps)
+}
+
 ShouldSave <- function(var.name, exclude, envir) {
     if(is.null(exclude)) {
         is.numeric(envir[[var.name]])
@@ -25,21 +39,21 @@ ShouldSave <- function(var.name, exclude, envir) {
     }
 }
 
-SaveSamples <- function(b, samps, envir, n.save, exclude, backing.path) {
-    for(var.name in ls(envir)) {
-        if(ShouldSave(var.name, exclude, envir)) {
-            # If it hasn't been done already, allocate storage for samples
-            if(is.null(samps[[var.name]])) {
-                samps <- InitSampMat(samps, envir[[var.name]], var.name, n.save,
-                                     backing.path)
-            }
-            # Save the sample
-            samps[[var.name]][b, ] <- c(envir[[var.name]])
-        }
-    }
-
-    return(samps)
-}
+# SaveSamples <- function(b, samps, envir, n.save, exclude, backing.path) {
+#     for(var.name in ls(envir)) {
+#         if(ShouldSave(var.name, exclude, envir)) {
+#             # If it hasn't been done already, allocate storage for samples
+#             if(is.null(samps[[var.name]])) {
+#                 samps <- InitSampMat(samps, envir[[var.name]], var.name, n.save,
+#                                      backing.path)
+#             }
+#             # Save the sample
+#             samps[[var.name]][b, ] <- c(envir[[var.name]])
+#         }
+#     }
+#
+#     return(samps)
+# }
 
 IsPositiveInteger <- function(x) {
     is.numeric(x) && (length(x)==1) && (x %% 1 == 0) && (x > 0)
@@ -124,14 +138,21 @@ InitMcmc <- function(n.save, backing.path=NA, thin=1, exclude=NULL) {
     function(expr) {
         expr_q <- substitute(expr)
         env <- new.env(parent=parent.frame(1))
+        env.len <- -1
         samps <- list()
-        on.exit(FlushMats(samps))
         for(b in 1:n.save) {
             for(t in 1:thin) {
                 eval(expr_q, envir=env)
             }
-            samps <- SaveSamples(b, samps, env, n.save, exclude, backing.path)
+            if(env.len != length(env)) {
+                samps <- InitSampMats(env, samps, n.save, backing.path, exclude)
+                env.len <- length(env)
+            }
+            for(var.name in names(samps)) {
+                samps[[var.name]][b, ] <- c(env[[var.name]])
+            }
         }
+        FlushMats(samps)
 
         return(samps)
     }
