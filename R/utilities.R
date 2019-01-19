@@ -22,7 +22,7 @@
 #' @export
 AcceptProposal <- function(log.curr, log.prop, log.curr.to.prop=0,
                            log.prop.to.curr=0) {
-    u <- stats::runif(1)
+    u <- stats::runif(length(log.prop))
     log(u) <= (log.prop - log.curr + log.prop.to.curr - log.curr.to.prop)
 }
 

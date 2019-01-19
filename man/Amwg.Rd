@@ -125,17 +125,14 @@ LogDTheta <- function(theta, mu, sigma.2, y) {
 # Non-adaptive Metropolis sampler
 SampleTheta <- function(theta.vec, mu, sigma.2, y.vec, n.obs, s) {
     theta.prop <- exp(log(theta.vec) + rnorm(n.obs, 0, s))
-    for(i in 1:n.obs) {
-        # Jacobians, because proposals are made on the log scale
-        j.curr <- log(theta.vec[i])
-        j.prop <- log(theta.prop[i])
 
-        log.curr <- LogDTheta(theta.vec[i], mu, sigma.2, y.vec[i]) + j.curr
-        log.prop <- LogDTheta(theta.prop[i], mu, sigma.2, y.vec[i]) + j.prop
-        if(AcceptProposal(log.curr, log.prop)) {
-            theta.vec[i] <- theta.prop[i]
-        }
-    }
+    # Jacobians, because proposals are made on the log scale
+    j.curr <- log(theta.vec)
+    j.prop <- log(theta.prop)
+
+    log.curr <- LogDTheta(theta.vec, mu, sigma.2, y.vec) + j.curr
+    log.prop <- LogDTheta(theta.prop, mu, sigma.2, y.vec) + j.prop
+    theta.vec <- ifelse(AcceptProposal(log.curr, log.prop), theta.prop, theta.vec)
 
     return(theta.vec)
 }
