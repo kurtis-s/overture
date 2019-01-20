@@ -39,22 +39,6 @@ ShouldSave <- function(var.name, exclude, envir) {
     }
 }
 
-# SaveSamples <- function(b, samps, envir, n.save, exclude, backing.path) {
-#     for(var.name in ls(envir)) {
-#         if(ShouldSave(var.name, exclude, envir)) {
-#             # If it hasn't been done already, allocate storage for samples
-#             if(is.null(samps[[var.name]])) {
-#                 samps <- InitSampMat(samps, envir[[var.name]], var.name, n.save,
-#                                      backing.path)
-#             }
-#             # Save the sample
-#             samps[[var.name]][b, ] <- c(envir[[var.name]])
-#         }
-#     }
-#
-#     return(samps)
-# }
-
 IsPositiveInteger <- function(x) {
     is.numeric(x) && (length(x)==1) && (x %% 1 == 0) && (x > 0)
 }
