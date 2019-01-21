@@ -154,18 +154,22 @@ AttachSampleMat <- function(backing.path, desc.name) {
 #'
 #' \code{LoadMcmc} loads the samples from a file-backed MCMC run initiated by
 #' \code{InitMcmc}.  The result is a list of \code{\link{big.matrix}} with all
-#' of the parameters that were saved in the MCMC run.  The samples from
-#' individual parameters can be loaded by using \code{\link{attach.big.matrix}}
-#' to load the corresponding \code{descriptor} file, "ParameterName.desc,"
-#' in the MCMC's \code{backing.path} directory.
+#' of the parameters that were saved in the MCMC run.  Alternatively, the
+#' samples for individual parameters can be loaded by using
+#' \code{\link{attach.big.matrix}} to load the corresponding \code{descriptor}
+#' file, "ParameterName.desc," in the MCMC's \code{backing.path} directory.
 #'
 #' @param backing.path directory path where MCMC samples were saved
 #' @return list of \code{\link{big.matrix}} with the MCMC samples
 #' @example examples/example-LoadMcmc.R
 #' @export
-#' @seealso \code{\link{attach.big.matrix}}
+#' @seealso \code{\link{ToMemory}}, \code{\link{Peek}},
+#'   \code{\link{attach.big.matrix}}
 LoadMcmc <- function(backing.path) {
     desc.names <- GetDescFileNames(backing.path)
+    if(identical(desc.names, character(0))) {
+        stop(paste0("No '.desc' files found in ", backing.path))
+    }
     sample.names <- gsub("\\.desc$", "", desc.names)
 
     samps <- list()
@@ -207,7 +211,7 @@ RemoveMissingDraws <- function(samps) {
 #' Load samples from a partial MCMC run
 #'
 #' \code{Peek} allows the samples from a file-backed MCMC to be loaded in
-#' another process while the MCMC is still in progress.  By using \code{Peek},
+#' another R session while the MCMC is still in progress.  By using \code{Peek},
 #' the chain's convergence can be monitored before the MCMC chain has finished
 #' running.
 #'
@@ -215,7 +219,8 @@ RemoveMissingDraws <- function(samps) {
 #' @return list of \link{big.matrix} with samples from the partial MCMC run
 #' @example examples/example-Peek.R
 #' @export
-#' @seealso \code{\link{InitMcmc}}, \code{\link{big.matrix}}
+#' @seealso \code{\link{InitMcmc}}, \code{\link{LoadMcmc}},
+#'   \code{\link{big.matrix}}
 Peek <- function(backing.path) {
     samps <- LoadMcmc(backing.path)
     samps.subsetted <- RemoveMissingDraws(samps)
