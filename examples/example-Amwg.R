@@ -23,10 +23,10 @@ samples <- Mcmc({
 })
 
 plot(1:n.save, samples$x, ylim=c(-10, 10), main="Traceplots", xlab="Iteration",
-     ylab="Value")
-points(1:n.save, samples$y, col="red")
+     ylab="Value", type='l')
+lines(1:n.save, samples$y, col="red")
 legend("bottomleft", legend=c("Adaptive", "Non-adaptive"),
-       col=c("black", "red"), pch=1, cex=0.8)
+       col=c("black", "red"), lty=1, cex=0.8)
 
 
 # Overdispersed Poisson ---------------------------------------------------
