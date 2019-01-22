@@ -189,6 +189,68 @@ test_that("Completed file-backed MCMC can be loaded back into R", {
     expect_equivalent(samps$y[,], samps.loaded$y[,])
 })
 
+test_that("InitMcmc samples overwritten if overwrite=TRUE", {
+    iter <- 2
+    test.dir <- TestDir()
+
+    Mcmc <- InitMcmc(iter, test.dir, overwrite=TRUE)
+    samps.1 <- Mcmc({
+        x <- 1
+    })
+
+    samps.2 <- Mcmc({
+        x <- 2
+    })
+    expect_equivalent(samps.2$x[,], rep(2, iter))
+})
+
+test_that("InitMcmc samples not overwritten if overwrite=FALSE", {
+    err.msg <- paste0("Backing file already exists in backing.path. ",
+                      "Use overwrite=TRUE to replace.")
+    iter <- 2
+    test.dir <- TestDir()
+
+    Mcmc <- InitMcmc(iter, test.dir, overwrite=FALSE)
+    samps.1 <- Mcmc({
+        x <- 1
+    })
+
+    expect_error(samps.2 <- Mcmc({ x <- 2 }), err.msg)
+    expect_equivalent(samps.1$x[,], rep(1, iter))
+    rm(samps.1)
+    loaded.samps.1 <- LoadMcmc(test.dir)
+    expect_equivalent(loaded.samps.1$x[,], rep(1, iter))
+})
+
+test_that("Default behavior for InitMcmc is overwrite=FALSE", {
+    err.msg <- paste0("Backing file already exists in backing.path. ",
+                      "Use overwrite=TRUE to replace.")
+    iter <- 2
+    test.dir <- TestDir()
+
+    Mcmc <- InitMcmc(iter, test.dir)
+    samps.1 <- Mcmc({
+        x <- 1
+    })
+
+    expect_error(samps.2 <- Mcmc({ x <- 2 }), err.msg)
+})
+
+test_that("Function returned by InitMcmc can take overwrite argument", {
+    iter <- 2
+    test.dir <- TestDir()
+
+    Mcmc <- InitMcmc(iter, test.dir)
+    samps.1 <- Mcmc({
+        x <- 1
+    })
+
+    samps.2 <- Mcmc({
+        x <- 2
+    }, overwrite=TRUE)
+    expect_equivalent(samps.2$x[,], rep(2, iter))
+})
+
 test_that("Error message if no .desc files in backing.path for LoadMcmc", {
     test.dir <- TestDir()
     wrong.path.err.msg <-

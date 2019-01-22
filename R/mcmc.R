@@ -1,8 +1,17 @@
-InitSampMat <- function(samps, var, var.name, n.save, backing.path) {
+InitSampMat <- function(samps, var, var.name, n.save, backing.path, overwrite) {
     if (is.na(backing.path)) { # In-memory
         samps[[var.name]] <- matrix(nrow = n.save, ncol = length(var))
     }
     else { # File backed
+        backing.file.path <- file.path(backing.path, var.name)
+        if(overwrite && file.exists(backing.file.path)) {
+            file.remove(backing.file.path)
+        }
+        else if(!overwrite && file.exists(backing.file.path)) {
+            stop(paste0("Backing file already exists in backing.path. ",
+                      "Use overwrite=TRUE to replace."))
+        }
+
         samps[[var.name]] <- bigmemory::big.matrix(
             nrow=n.save,
             ncol=length(var),
@@ -16,13 +25,14 @@ InitSampMat <- function(samps, var, var.name, n.save, backing.path) {
     return(samps)
 }
 
-InitSampMats <- function(envir, samps, n.save, backing.path, exclude) {
+InitSampMats <- function(envir, samps, n.save, backing.path, exclude,
+                         overwrite) {
     for(var.name in ls(envir)) {
         if(ShouldSave(var.name, exclude, envir)) {
             # If it hasn't been done already, allocate storage for samples
             if(is.null(samps[[var.name]])) {
                 samps <- InitSampMat(samps, envir[[var.name]], var.name, n.save,
-                                     backing.path)
+                                     backing.path, overwrite)
             }
         }
     }
@@ -96,19 +106,28 @@ FlushMats <- function(samps) {
 #' according to the variable assignment names made in the R expression, but with
 #' a ".desc" suffix.
 #'
+#' By default, \code{InitMcmc} will not overwrite the results from a previous
+#' file-backed MCMC.  This behavior can be overridden by specifying
+#' \code{overwrite=TRUE} in \code{InitMcmc}, or as the second argument to the
+#' function returned by \code{InitMcmc}.  See the examples for an illustration.
+#' \code{overwrite} is ignored for in-memory MCMC.
+#'
 #' @param n.save number of samples to take.  If \code{thin}=1, the number of
 #'   iterations to run the MCMC chain
 #' @param backing.path \code{NA} to save the samples in-memory, otherwise
 #'   directory path where MCMC samples will be saved
 #' @param thin thinning interval
+#' @param overwrite TRUE/FALSE indicating whether previous MCMC results should
+#'   be overwritten
 #' @param exclude character vector specifying variables that should not be saved
-#' @return A list of either \code{\link{matrix}} or \code{\link{big.matrix}}
-#'   with the MCMC samples.  Each row in the matrices corresponds to one sample
-#'   from the MCMC chain.
+#' @return A function that returns a list of either \code{\link{matrix}} or
+#'   \code{\link{big.matrix}} with the MCMC samples.  Each row in the matrices
+#'   corresponds to one sample from the MCMC chain.
 #' @example examples/example-InitMcmc.R
 #' @export
 #' @seealso \code{\link{bigmemory}}
-InitMcmc <- function(n.save, backing.path=NA, thin=1, exclude=NULL) {
+InitMcmc <- function(n.save, backing.path=NA, thin=1, exclude=NULL,
+                     overwrite=FALSE) {
     if(!IsPositiveInteger(n.save)) stop("'n.save' must be an integer > 0")
     if(!IsPositiveInteger(thin)) stop("'thin' must be an integer > 0")
     if(!is.null(exclude) && !is.character(exclude)) {
@@ -119,7 +138,8 @@ InitMcmc <- function(n.save, backing.path=NA, thin=1, exclude=NULL) {
         stop("Package 'bigmemory' required for saving on-disk")
     }
 
-    function(expr) {
+    over.write <- overwrite # To avoid recursive default argument reference
+    function(expr, overwrite=over.write) {
         expr_q <- substitute(expr)
         env <- new.env(parent=parent.frame(1))
         env.len <- -1
@@ -129,7 +149,8 @@ InitMcmc <- function(n.save, backing.path=NA, thin=1, exclude=NULL) {
                 eval(expr_q, envir=env)
             }
             if(env.len != length(env)) {
-                samps <- InitSampMats(env, samps, n.save, backing.path, exclude)
+                samps <- InitSampMats(env, samps, n.save, backing.path, exclude,
+                                      overwrite)
                 env.len <- length(env)
             }
             for(var.name in names(samps)) {
