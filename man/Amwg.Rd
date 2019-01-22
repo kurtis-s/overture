@@ -36,23 +36,16 @@ deviation, \eqn{log(s)}, is increased/decreased by \eqn{\delta(n)}.
 \eqn{log(s)} is increased by \eqn{\delta(n)} if the observed acceptance rate
 is more than the target acceptance rate, or decreased by \eqn{\delta(n)} if
 the observed acceptance rate is less than the target acceptance rate.
+\code{Amwg} keeps track of the the acceptance rate by comparing the
+previously sampled value from \code{f} to the next value.  If the two values
+are equal, the proposal is considered to be rejected, whereas if the two
+values are different the proposal is considered accepted.
 
 \code{DeltaN} is set to \eqn{\delta(n) = min(0.01, n^{-1/2})} unless
 re-specified in the function call. Some care should be taken if re-specifying
 \code{DeltaN}, as the ergodicity of the chain may not be preserved if certain
 conditions aren't met.  See Roberts & Rosenthal (2009) in the references for
 details.
-
-\code{Amwg} keeps track of the the acceptance rate by comparing the
-previously sampled value from \code{f} to the next value.  If the two values
-are equal, the proposal is considered to be rejected, whereas if the two
-values are different the proposal is considered accepted. \code{Amwg},
-therefore, is intended to be used in cases where the target distribution is
-continuous and ties aren't possible; otherwise the calculated acceptance rate
-may be incorrect. For example, if the target distribution and the proposal
-distribution are discrete, it may be possible for the previously sampled
-parameter value and the next parameter value to be the same, even if the
-proposal is accepted.
 
 The proposal standard deviation \code{s} can be either a vector or a scalar.
 If the initial value of \code{s} is a scalar, \eqn{f} will be treated as a
