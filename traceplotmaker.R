@@ -1,6 +1,8 @@
 ### Makes the traceplot in README.md
 rm(list=ls())
 
+library(overture)
+
 set.seed(38299)
 
 LogP <- function(x) dnorm(x, 0, 1, log=TRUE) # Target distribution
