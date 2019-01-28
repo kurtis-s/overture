@@ -1,6 +1,7 @@
 # overture
 [![Build Status](https://travis-ci.org/kurtis-s/overture.svg?branch=master)](https://travis-ci.org/kurtis-s/overture)
 [![Coverage status](https://codecov.io/gh/kurtis-s/overture/branch/master/graph/badge.svg)](https://codecov.io/github/kurtis-s/overture?branch=master)
+[![CRAN status](https://www.r-pkg.org/badges/version/overture)](https://cran.r-project.org/package=overture)
 
 `overture` makes writing Markov chain Monte Carlo (MCMC) samplers simpler.  With overture you can:
 
