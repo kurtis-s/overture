@@ -118,8 +118,14 @@ samples.so.far$x[,]
 More examples and details are given in the package documentation.
 
 ## Installation
-After installing [devtools](https://github.com/r-lib/devtools) run:
+To install from CRAN run:
 ```r
-library(devtools)
-install_github("kurtis-s/overture")
+install.packages("overture")
 ```
+
+To install from GitHub, after installing [devtools](https://github.com/r-lib/devtools) run:
+```r
+devtools::install_github("kurtis-s/overture")
+```
+
+If you aren't sure which version to install, you probably want to install from CRAN.
