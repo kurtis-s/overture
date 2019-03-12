@@ -255,7 +255,7 @@ test_that("Error message if no .desc files in backing.path for LoadMcmc", {
     test.dir <- TestDir()
     wrong.path.err.msg <-
         paste0("No '.desc' files found in ", test.dir)
-    expect_error(LoadMcmc(test.dir), wrong.path.err.msg)
+    expect_error(LoadMcmc(test.dir), wrong.path.err.msg, fixed=TRUE)
 })
 
 test_that("In-progress file-backed MCMC can be viewed", {
@@ -282,7 +282,7 @@ test_that("Error message if no .desc files in backing.path for Peek", {
     test.dir <- TestDir()
     wrong.path.err.msg <-
         paste0("No '.desc' files found in ", test.dir)
-    expect_error(Peek(test.dir), wrong.path.err.msg)
+    expect_error(Peek(test.dir), wrong.path.err.msg, fixed=TRUE)
 })
 
 test_that("ToMemory converts MCMC samples to in-memory", {
