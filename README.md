@@ -1,18 +1,20 @@
-# overture
+# overture <img src="tools/traceplot.png" align="right" height="100" />
 [![Build Status](https://travis-ci.org/kurtis-s/overture.svg?branch=master)](https://travis-ci.org/kurtis-s/overture)
 [![Coverage status](https://codecov.io/gh/kurtis-s/overture/branch/master/graph/badge.svg)](https://codecov.io/github/kurtis-s/overture?branch=master)
 [![CRAN status](https://www.r-pkg.org/badges/version/overture)](https://cran.r-project.org/package=overture)
 
-`overture` makes writing Markov chain Monte Carlo (MCMC) samplers simpler.  With overture you can:
+## Features
+Overture makes writing Markov chain Monte Carlo (MCMC) samplers simpler.  With overture you can:
 
-* **Write less code** `overture` eliminates boilerplate code, looping through sampling functions and saving the results automatically.
-* **Easily recover from interruptions** Samples can be saved on-disk as the MCMC runs, so it's easy to resume an MCMC if something goes wrong.
+* **Write less code** Overture eliminates boilerplate code, looping through sampling functions and saving the results automatically.
+* **Easily recover from interruptions** Samples can be saved on-disk as the MCMC runs, so it's easy to resume the chain if something goes wrong.
 * **Run more chains in parallel** Saving samples on-disk results in a dramatically smaller memory footprint for high-dimensional models, allowing more chains to be run when available RAM is limited.
 * **Monitor chain progress** Samples can be viewed in another R process while the MCMC is still running.
 
 ## Usage
 ### Basic Usage
-Using `overture` is easy:
+Using overture is easy:
+
 #### 1. Write the sampling functions
 ```r
 SampleX <- function(x) {
@@ -116,8 +118,14 @@ samples.so.far$x[,]
 More examples and details are given in the package documentation.
 
 ## Installation
-After installing [devtools](https://github.com/r-lib/devtools) run:
+To install from CRAN run:
 ```r
-library(devtools)
-install_github("kurtis-s/overture")
+install.packages("overture")
 ```
+
+To install from GitHub, after installing [devtools](https://github.com/r-lib/devtools) run:
+```r
+devtools::install_github("kurtis-s/overture")
+```
+
+If you aren't sure which version to install, you probably want to install from CRAN.

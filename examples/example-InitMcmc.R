@@ -119,3 +119,28 @@ samples <- Mcmc({
 y.hat <- x %*% colMeans(samples$beta[,])
 plot(y.hat, y-y.hat, xlab="Predicted", ylab="Residual")
 abline(h=0, col="red")
+
+# Overwrite previous results ----------------------------------------------
+### Overwrite specified in InitMcmc
+backing.path <- tempfile()
+dir.create(backing.path)
+Mcmc <- InitMcmc(5, backing.path=backing.path, overwrite=TRUE)
+samples <- Mcmc({
+    x <- 1
+})
+samples <- Mcmc({
+    x <- 2
+})
+samples$x[,]
+
+### Overwrite specified in the function returned by InitMcmc
+backing.path <- tempfile()
+dir.create(backing.path)
+Mcmc <- InitMcmc(5, backing.path=backing.path, overwrite=FALSE)
+samples <- Mcmc({
+    x <- 3
+})
+samples <- Mcmc({
+    x <- 4
+}, overwrite=TRUE)
+samples$x[,]

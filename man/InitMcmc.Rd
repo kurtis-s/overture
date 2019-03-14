@@ -4,7 +4,8 @@
 \alias{InitMcmc}
 \title{Initialize a Markov chain Monte Carlo run}
 \usage{
-InitMcmc(n.save, backing.path = NA, thin = 1, exclude = NULL)
+InitMcmc(n.save, backing.path = NA, thin = 1, exclude = NULL,
+  overwrite = FALSE)
 }
 \arguments{
 \item{n.save}{number of samples to take.  If \code{thin}=1, the number of
@@ -16,11 +17,14 @@ directory path where MCMC samples will be saved}
 \item{thin}{thinning interval}
 
 \item{exclude}{character vector specifying variables that should not be saved}
+
+\item{overwrite}{TRUE/FALSE indicating whether previous MCMC results should
+be overwritten}
 }
 \value{
-A list of either \code{\link{matrix}} or \code{\link{big.matrix}}
-  with the MCMC samples.  Each row in the matrices corresponds to one sample
-  from the MCMC chain.
+A function that returns a list of either \code{\link{matrix}} or
+  \code{\link{big.matrix}} with the MCMC samples.  Each row in the matrices
+  corresponds to one sample from the MCMC chain.
 }
 \description{
 Eliminates much of the "boilerplate" code needed for MCMC implementations by
@@ -63,6 +67,12 @@ chosen in such a way that they are compatible as filenames on the operating
 system.  The \code{\link{big.matrix}} \code{descriptorfile}s are also named
 according to the variable assignment names made in the R expression, but with
 a ".desc" suffix.
+
+By default, \code{InitMcmc} will not overwrite the results from a previous
+file-backed MCMC.  This behavior can be overridden by specifying
+\code{overwrite=TRUE} in \code{InitMcmc}, or as the second argument to the
+function returned by \code{InitMcmc}.  See the examples for an illustration.
+\code{overwrite} is ignored for in-memory MCMC.
 }
 \examples{
 # Beta-binomial -----------------------------------------------------------
@@ -186,6 +196,31 @@ samples <- Mcmc({
 y.hat <- x \%*\% colMeans(samples$beta[,])
 plot(y.hat, y-y.hat, xlab="Predicted", ylab="Residual")
 abline(h=0, col="red")
+
+# Overwrite previous results ----------------------------------------------
+### Overwrite specified in InitMcmc
+backing.path <- tempfile()
+dir.create(backing.path)
+Mcmc <- InitMcmc(5, backing.path=backing.path, overwrite=TRUE)
+samples <- Mcmc({
+    x <- 1
+})
+samples <- Mcmc({
+    x <- 2
+})
+samples$x[,]
+
+### Overwrite specified in the function returned by InitMcmc
+backing.path <- tempfile()
+dir.create(backing.path)
+Mcmc <- InitMcmc(5, backing.path=backing.path, overwrite=FALSE)
+samples <- Mcmc({
+    x <- 3
+})
+samples <- Mcmc({
+    x <- 4
+}, overwrite=TRUE)
+samples$x[,]
 }
 \seealso{
 \code{\link{bigmemory}}

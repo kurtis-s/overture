@@ -14,7 +14,7 @@ list of \link{big.matrix} with samples from the partial MCMC run
 }
 \description{
 \code{Peek} allows the samples from a file-backed MCMC to be loaded in
-another process while the MCMC is still in progress.  By using \code{Peek},
+another R session while the MCMC is still in progress.  By using \code{Peek},
 the chain's convergence can be monitored before the MCMC chain has finished
 running.
 }
@@ -40,5 +40,6 @@ samples.so.far$x[,]
 }
 }
 \seealso{
-\code{\link{InitMcmc}}, \code{\link{big.matrix}}
+\code{\link{InitMcmc}}, \code{\link{LoadMcmc}},
+  \code{\link{big.matrix}}
 }

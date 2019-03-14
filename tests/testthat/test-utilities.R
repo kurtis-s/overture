@@ -2,19 +2,50 @@ context("test-utilities")
 
 kDelta.n <- 0.01 # Default proposal sd delta from Roberts & Rosenthal (2009)
 
-test_that("AcceptProposal works", {
+test_that("AcceptProp works", {
     # Always accept when the Metropolis ratio is >= 1
-    expect_true(AcceptProposal(log(1), log(10)))
-    expect_true(AcceptProposal(log(2), log(1), log(1), log(2)))
-    expect_true(AcceptProposal(log(2), log(1), log(1), log(10)))
+    expect_true(AcceptProp(log(1), log(10)))
+    expect_true(AcceptProp(log(2), log(1), log(1), log(2)))
+    expect_true(AcceptProp(log(2), log(1), log(1), log(10)))
 
     # Tests for Metropolis ratio < 1
     m1 <- mockery::mock(0.4, 0.6, 0.2, 0.3)
-    mockery::stub(AcceptProposal, "stats::runif", m1)
-    expect_true(AcceptProposal(log(2), log(1)))
-    expect_false(AcceptProposal(log(2), log(1)))
-    expect_true(AcceptProposal(log(2), log(1), log(2), log(1)))
-    expect_false(AcceptProposal(log(2), log(1), log(2), log(1)))
+    mockery::stub(AcceptProp, "stats::runif", m1)
+    expect_true(AcceptProp(log(2), log(1)))
+    expect_false(AcceptProp(log(2), log(1)))
+    expect_true(AcceptProp(log(2), log(1), log(2), log(1)))
+    expect_false(AcceptProp(log(2), log(1), log(2), log(1)))
+})
+
+test_that("AcceptProp is vectorized", {
+    # Always accept when the Metropolis ratio is >= 1
+    expect_equivalent(AcceptProp(log(c(1, 1)), log(c(2, 2))), c(TRUE, TRUE))
+
+    # Accept first, reject second
+    m1 <- mockery::mock(c(0.01, 0.99))
+    mockery::stub(AcceptProp, "stats::runif", m1)
+    log.curr.1 <- log(c(2, 2))
+    log.prop.1 <- log(c(1, 1))
+    expect_equivalent(AcceptProp(log.curr.1, log.prop.1), c(TRUE, FALSE))
+
+    # Reject both
+    m2 <- mockery::mock(c(0.99, 0.99))
+    mockery::stub(AcceptProp, "stats::runif", m2)
+    log.curr.2 <- log(c(2, 2))
+    log.prop.2 <- log(c(1, 1))
+    expect_equivalent(AcceptProp(log.curr.2, log.prop.2), c(FALSE, FALSE))
+
+    # Accept first, reject second, with transition probs
+    m3 <- mockery::mock(c(0.2, 0.3))
+    mockery::stub(AcceptProp, "stats::runif", m3)
+    log.curr.3 <- log(c(2, 2))
+    log.prop.3 <- log(c(1, 1))
+    log.curr.to.prop.3 <- log(c(2, 2))
+    log.prop.to.curr.3 <- log(c(1, 1))
+    expect_equivalent(AcceptProp(log.curr.3,log.prop.3, log.curr.to.prop.3,
+                                     log.prop.to.curr.3),
+                      c(TRUE, FALSE))
+
 })
 
 test_that("Amwg increases/decreases proposal sd in vector setting", {

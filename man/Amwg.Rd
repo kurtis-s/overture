@@ -36,23 +36,16 @@ deviation, \eqn{log(s)}, is increased/decreased by \eqn{\delta(n)}.
 \eqn{log(s)} is increased by \eqn{\delta(n)} if the observed acceptance rate
 is more than the target acceptance rate, or decreased by \eqn{\delta(n)} if
 the observed acceptance rate is less than the target acceptance rate.
+\code{Amwg} keeps track of the the acceptance rate by comparing the
+previously sampled value from \code{f} to the next value.  If the two values
+are equal, the proposal is considered to be rejected, whereas if the two
+values are different the proposal is considered accepted.
 
 \code{DeltaN} is set to \eqn{\delta(n) = min(0.01, n^{-1/2})} unless
 re-specified in the function call. Some care should be taken if re-specifying
 \code{DeltaN}, as the ergodicity of the chain may not be preserved if certain
 conditions aren't met.  See Roberts & Rosenthal (2009) in the references for
 details.
-
-\code{Amwg} keeps track of the the acceptance rate by comparing the
-previously sampled value from \code{f} to the next value.  If the two values
-are equal, the proposal is considered to be rejected, whereas if the two
-values are different the proposal is considered accepted. \code{Amwg},
-therefore, is intended to be used in cases where the target distribution is
-continuous and ties aren't possible; otherwise the calculated acceptance rate
-may be incorrect. For example, if the target distribution and the proposal
-distribution are discrete, it may be possible for the previously sampled
-parameter value and the next parameter value to be the same, even if the
-proposal is accepted.
 
 The proposal standard deviation \code{s} can be either a vector or a scalar.
 If the initial value of \code{s} is a scalar, \eqn{f} will be treated as a
@@ -72,7 +65,7 @@ LogP <- function(x) dnorm(x, 1, 2, log=TRUE) # Target distribution
 
 f <- function(x, s) { # Non-adaptive Metropolis sampler
     x.prop <- x + rnorm(1, 0, s)
-    if(AcceptProposal(LogP(x), LogP(x.prop))) {
+    if(AcceptProp(LogP(x), LogP(x.prop))) {
         x <- x.prop
     }
 
@@ -92,10 +85,10 @@ samples <- Mcmc({
 })
 
 plot(1:n.save, samples$x, ylim=c(-10, 10), main="Traceplots", xlab="Iteration",
-     ylab="Value")
-points(1:n.save, samples$y, col="red")
+     ylab="Value", type='l')
+lines(1:n.save, samples$y, col="red")
 legend("bottomleft", legend=c("Adaptive", "Non-adaptive"),
-       col=c("black", "red"), pch=1, cex=0.8)
+       col=c("black", "red"), lty=1, cex=0.8)
 
 
 # Overdispersed Poisson ---------------------------------------------------
@@ -125,17 +118,14 @@ LogDTheta <- function(theta, mu, sigma.2, y) {
 # Non-adaptive Metropolis sampler
 SampleTheta <- function(theta.vec, mu, sigma.2, y.vec, n.obs, s) {
     theta.prop <- exp(log(theta.vec) + rnorm(n.obs, 0, s))
-    for(i in 1:n.obs) {
-        # Jacobians, because proposals are made on the log scale
-        j.curr <- log(theta.vec[i])
-        j.prop <- log(theta.prop[i])
 
-        log.curr <- LogDTheta(theta.vec[i], mu, sigma.2, y.vec[i]) + j.curr
-        log.prop <- LogDTheta(theta.prop[i], mu, sigma.2, y.vec[i]) + j.prop
-        if(AcceptProposal(log.curr, log.prop)) {
-            theta.vec[i] <- theta.prop[i]
-        }
-    }
+    # Jacobians, because proposals are made on the log scale
+    j.curr <- log(theta.vec)
+    j.prop <- log(theta.prop)
+
+    log.curr <- LogDTheta(theta.vec, mu, sigma.2, y.vec) + j.curr
+    log.prop <- LogDTheta(theta.prop, mu, sigma.2, y.vec) + j.prop
+    theta.vec <- ifelse(AcceptProp(log.curr, log.prop), theta.prop, theta.vec)
 
     return(theta.vec)
 }

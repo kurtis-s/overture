@@ -15,10 +15,10 @@ list of \code{\link{big.matrix}} with the MCMC samples
 \description{
 \code{LoadMcmc} loads the samples from a file-backed MCMC run initiated by
 \code{InitMcmc}.  The result is a list of \code{\link{big.matrix}} with all
-of the parameters that were saved in the MCMC run.  The samples from
-individual parameters can be loaded by using \code{\link{attach.big.matrix}}
-to load the corresponding \code{descriptor} file, "ParameterName.desc,"
-in the MCMC's \code{backing.path} directory.
+of the parameters that were saved in the MCMC run.  Alternatively, the
+samples for individual parameters can be loaded by using
+\code{\link{attach.big.matrix}} to load the corresponding \code{descriptor}
+file, "ParameterName.desc," in the MCMC's \code{backing.path} directory.
 }
 \examples{
 # Run a file-backed MCMC
@@ -35,5 +35,6 @@ loaded.samples <- LoadMcmc(backing.path)
 hist(loaded.samples$x[,], main="Samples", xlab="x")
 }
 \seealso{
-\code{\link{attach.big.matrix}}
+\code{\link{ToMemory}}, \code{\link{Peek}},
+  \code{\link{attach.big.matrix}}
 }

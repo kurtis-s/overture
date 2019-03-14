@@ -18,7 +18,7 @@ DLogProp <- function(x) { # Log density of proposal distribution
 
 SampleX <- function(x) { # Draw once from the target distribution
     x.prop <- RProp()
-    if(AcceptProposal(LogP(x), LogP(x.prop), DLogProp(x.prop), DLogProp(x))) {
+    if(AcceptProp(LogP(x), LogP(x.prop), DLogProp(x.prop), DLogProp(x))) {
         x <- x.prop
     }
 

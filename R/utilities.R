@@ -1,6 +1,6 @@
 #' Determine if a Metropolis–Hastings step should be accepted
 #'
-#' \code{AcceptProposal} is a utility function to determine if a proposal should
+#' \code{AcceptProp} is a utility function to determine if a proposal should
 #' be accepted in a Metropolis or Metropolis-Hastings step.
 #'
 #' The function uses the Metropolis choice for a Metropolis/Metropolis-Hastings
@@ -18,12 +18,35 @@
 #'   current value, \eqn{log(g(x|x'))}
 #' @return \code{TRUE/FALSE} for whether the proposal should be accepted or
 #'   rejected, respectively
-#' @example examples/example-AcceptProposal.R
+#' @example examples/example-AcceptProp.R
+#' @export
+AcceptProp <- function(log.curr, log.prop, log.curr.to.prop=0,
+                           log.prop.to.curr=0) {
+    u <- stats::runif(length(log.prop))
+    log(u) <= (log.prop - log.curr + log.prop.to.curr - log.curr.to.prop)
+}
+
+#' Determine if a Metropolis–Hastings step should be accepted
+#'
+#' \code{AcceptProposal} is deprecated.  Please use \code{\link{AcceptProp}}
+#' instead.
+#'
+#' @param log.curr log density of the target at the current value,
+#'   \eqn{log(P(x))}
+#' @param log.prop log density of the target at the proposed value,
+#'   \eqn{log(P(x'))}
+#' @param log.curr.to.prop log of transition distribution from current value to
+#'   proposed value, \eqn{log(g(x'|x))}
+#' @param log.prop.to.curr log of transition distribution from proposed value to
+#'   current value, \eqn{log(g(x|x'))}
+#' @return \code{TRUE/FALSE} for whether the proposal should be accepted or
+#'   rejected, respectively
+#' @example examples/example-AcceptProp.R
 #' @export
 AcceptProposal <- function(log.curr, log.prop, log.curr.to.prop=0,
                            log.prop.to.curr=0) {
-    u <- stats::runif(1)
-    log(u) <= (log.prop - log.curr + log.prop.to.curr - log.curr.to.prop)
+    .Deprecated("AcceptProp")
+    AcceptProp(log.curr, log.prop, log.curr.to.prop=0,  log.prop.to.curr=0)
 }
 
 DeltaNDefault <- function(n) {
@@ -46,23 +69,16 @@ DeltaNDefault <- function(n) {
 #' \eqn{log(s)} is increased by \eqn{\delta(n)} if the observed acceptance rate
 #' is more than the target acceptance rate, or decreased by \eqn{\delta(n)} if
 #' the observed acceptance rate is less than the target acceptance rate.
+#' \code{Amwg} keeps track of the the acceptance rate by comparing the
+#' previously sampled value from \code{f} to the next value.  If the two values
+#' are equal, the proposal is considered to be rejected, whereas if the two
+#' values are different the proposal is considered accepted.
 #'
 #' \code{DeltaN} is set to \eqn{\delta(n) = min(0.01, n^{-1/2})} unless
 #' re-specified in the function call. Some care should be taken if re-specifying
 #' \code{DeltaN}, as the ergodicity of the chain may not be preserved if certain
 #' conditions aren't met.  See Roberts & Rosenthal (2009) in the references for
 #' details.
-#'
-#' \code{Amwg} keeps track of the the acceptance rate by comparing the
-#' previously sampled value from \code{f} to the next value.  If the two values
-#' are equal, the proposal is considered to be rejected, whereas if the two
-#' values are different the proposal is considered accepted. \code{Amwg},
-#' therefore, is intended to be used in cases where the target distribution is
-#' continuous and ties aren't possible; otherwise the calculated acceptance rate
-#' may be incorrect. For example, if the target distribution and the proposal
-#' distribution are discrete, it may be possible for the previously sampled
-#' parameter value and the next parameter value to be the same, even if the
-#' proposal is accepted.
 #'
 #' The proposal standard deviation \code{s} can be either a vector or a scalar.
 #' If the initial value of \code{s} is a scalar, \eqn{f} will be treated as a

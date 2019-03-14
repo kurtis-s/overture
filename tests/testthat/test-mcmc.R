@@ -189,6 +189,75 @@ test_that("Completed file-backed MCMC can be loaded back into R", {
     expect_equivalent(samps$y[,], samps.loaded$y[,])
 })
 
+test_that("InitMcmc samples overwritten if overwrite=TRUE", {
+    iter <- 2
+    test.dir <- TestDir()
+
+    Mcmc <- InitMcmc(iter, test.dir, overwrite=TRUE)
+    samps.1 <- Mcmc({
+        x <- 1
+    })
+
+    samps.2 <- Mcmc({
+        x <- 2
+    })
+    expect_equivalent(samps.2$x[,], rep(2, iter))
+})
+
+test_that("InitMcmc samples not overwritten if overwrite=FALSE", {
+    err.msg <- paste0("Backing file already exists in backing.path. ",
+                      "Use overwrite=TRUE to replace.")
+    iter <- 2
+    test.dir <- TestDir()
+
+    Mcmc <- InitMcmc(iter, test.dir, overwrite=FALSE)
+    samps.1 <- Mcmc({
+        x <- 1
+    })
+
+    expect_error(samps.2 <- Mcmc({ x <- 2 }), err.msg)
+    expect_equivalent(samps.1$x[,], rep(1, iter))
+    rm(samps.1)
+    loaded.samps.1 <- LoadMcmc(test.dir)
+    expect_equivalent(loaded.samps.1$x[,], rep(1, iter))
+})
+
+test_that("Default behavior for InitMcmc is overwrite=FALSE", {
+    err.msg <- paste0("Backing file already exists in backing.path. ",
+                      "Use overwrite=TRUE to replace.")
+    iter <- 2
+    test.dir <- TestDir()
+
+    Mcmc <- InitMcmc(iter, test.dir)
+    samps.1 <- Mcmc({
+        x <- 1
+    })
+
+    expect_error(samps.2 <- Mcmc({ x <- 2 }), err.msg)
+})
+
+test_that("Function returned by InitMcmc can take overwrite argument", {
+    iter <- 2
+    test.dir <- TestDir()
+
+    Mcmc <- InitMcmc(iter, test.dir)
+    samps.1 <- Mcmc({
+        x <- 1
+    })
+
+    samps.2 <- Mcmc({
+        x <- 2
+    }, overwrite=TRUE)
+    expect_equivalent(samps.2$x[,], rep(2, iter))
+})
+
+test_that("Error message if no .desc files in backing.path for LoadMcmc", {
+    test.dir <- TestDir()
+    wrong.path.err.msg <-
+        paste0("No '.desc' files found in ", test.dir)
+    expect_error(LoadMcmc(test.dir), wrong.path.err.msg, fixed=TRUE)
+})
+
 test_that("In-progress file-backed MCMC can be viewed", {
     iter <- 10
     test.dir <- TestDir()
@@ -207,6 +276,13 @@ test_that("In-progress file-backed MCMC can be viewed", {
     samps <- Peek(test.dir)
     expect_equivalent(samps$x[,], 1:5)
     expect_equivalent(samps$y[,], matrix(rep(1:5, times=2), nrow=5))
+})
+
+test_that("Error message if no .desc files in backing.path for Peek", {
+    test.dir <- TestDir()
+    wrong.path.err.msg <-
+        paste0("No '.desc' files found in ", test.dir)
+    expect_error(Peek(test.dir), wrong.path.err.msg, fixed=TRUE)
 })
 
 test_that("ToMemory converts MCMC samples to in-memory", {
