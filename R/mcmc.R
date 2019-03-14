@@ -1,25 +1,63 @@
+CreateSampsMat <- function(samps, var, var.name, n.save, backing.path) {
+    samps[[var.name]] <- bigmemory::big.matrix(
+        nrow=n.save,
+        ncol=length(var),
+        init=NA,
+        backingpath=backing.path,
+        backingfile=var.name,
+        descriptorfile=paste0(var.name, ".desc")
+    )
+
+    return(samps)
+}
+
+InitExistingSampMat <- function(backing.file.path, desc.file.path, samps, var,
+                                var.name, n.save, backing.path) {
+        old.bigmat <- bigmemory::attach.big.matrix(desc.file.path)
+        if(ncol(old.bigmat) == length(var)) { # Current mat is correct size
+            old.bigmat[,] <- NA
+            samps[[var.name]] <- old.bigmat
+        }
+        else { # Try removing the old big.matrix, might not work on Windows
+            if(file.remove(backing.file.path)) {
+                samps <- CreateSampsMat(samps, var, var.name, n.save,
+                                        backing.path)
+            }
+            else {
+                stop(paste0("Failed to remove ", backing.file.path,
+                            ".  Try removing the file manually."))
+            }
+        }
+
+        return(samps)
+}
+
 InitSampMat <- function(samps, var, var.name, n.save, backing.path, overwrite) {
     if (is.na(backing.path)) { # In-memory
         samps[[var.name]] <- matrix(nrow = n.save, ncol = length(var))
     }
     else { # File backed
         backing.file.path <- file.path(backing.path, var.name)
-        if(overwrite && file.exists(backing.file.path)) {
-            file.remove(backing.file.path)
-        }
-        else if(!overwrite && file.exists(backing.file.path)) {
-            stop(paste0("Backing file already exists in backing.path. ",
-                      "Use overwrite=TRUE to replace."))
-        }
+        if(file.exists(backing.file.path)) {
+            if(!overwrite) { # Stop right away if overwrite is false
+                stop(paste0("Backing file already exists in backing.path. ",
+                          "Use overwrite=TRUE to replace."))
+            }
 
-        samps[[var.name]] <- bigmemory::big.matrix(
-            nrow=n.save,
-            ncol=length(var),
-            init=NA,
-            backingpath=backing.path,
-            backingfile=var.name,
-            descriptorfile=paste0(var.name, ".desc")
-        )
+            desc.file.path <- file.path(backing.path, paste0(var.name, ".desc"))
+            if(!file.exists(desc.file.path)) {
+                stop(paste0("Tried to overwrite ", var.name,
+                            " but couldn't find ", desc.file.path,
+                            "Try removing the old results manually."))
+            }
+
+            samps <- InitExistingSampMat(backing.file.path, desc.file.path,
+                                         samps, var, var.name, n.save,
+                                         backing.path)
+        }
+        else {
+            samps <- CreateSampsMat(samps, var, var.name, n.save, backing.path)
+        }
     }
 
     return(samps)
