@@ -1,6 +1,6 @@
 #' Determine if a Metropolis–Hastings step should be accepted
 #'
-#' \code{AcceptProposal} is a utility function to determine if a proposal should
+#' \code{AcceptProp} is a utility function to determine if a proposal should
 #' be accepted in a Metropolis or Metropolis-Hastings step.
 #'
 #' The function uses the Metropolis choice for a Metropolis/Metropolis-Hastings
@@ -18,13 +18,20 @@
 #'   current value, \eqn{log(g(x|x'))}
 #' @return \code{TRUE/FALSE} for whether the proposal should be accepted or
 #'   rejected, respectively
-#' @example examples/example-AcceptProposal.R
+#' @example examples/example-AcceptProp.R
 #' @export
-AcceptProposal <- function(log.curr, log.prop, log.curr.to.prop=0,
+AcceptProp <- function(log.curr, log.prop, log.curr.to.prop=0,
                            log.prop.to.curr=0) {
     u <- stats::runif(length(log.prop))
     log(u) <= (log.prop - log.curr + log.prop.to.curr - log.curr.to.prop)
 }
+
+AcceptProposal <- function(log.curr, log.prop, log.curr.to.prop=0,
+                           log.prop.to.curr=0) {
+    .Deprecated("AcceptProp")
+    AcceptProp(log.curr, log.prop, log.curr.to.prop=0,  log.prop.to.curr=0)
+}
+
 
 DeltaNDefault <- function(n) {
     # Default proposal sd delta from Roberts & Rosenthal (2009)

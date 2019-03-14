@@ -3,7 +3,7 @@ LogP <- function(x) dnorm(x, 1, 2, log=TRUE) # Target distribution
 
 f <- function(x, s) { # Non-adaptive Metropolis sampler
     x.prop <- x + rnorm(1, 0, s)
-    if(AcceptProposal(LogP(x), LogP(x.prop))) {
+    if(AcceptProp(LogP(x), LogP(x.prop))) {
         x <- x.prop
     }
 
@@ -63,7 +63,7 @@ SampleTheta <- function(theta.vec, mu, sigma.2, y.vec, n.obs, s) {
 
     log.curr <- LogDTheta(theta.vec, mu, sigma.2, y.vec) + j.curr
     log.prop <- LogDTheta(theta.prop, mu, sigma.2, y.vec) + j.prop
-    theta.vec <- ifelse(AcceptProposal(log.curr, log.prop), theta.prop, theta.vec)
+    theta.vec <- ifelse(AcceptProp(log.curr, log.prop), theta.prop, theta.vec)
 
     return(theta.vec)
 }
