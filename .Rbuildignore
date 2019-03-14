@@ -4,5 +4,4 @@
 ^examples$
 ^\.travis\.yml$
 ^cran-comments.md$
-^traceplot.png$
 ^traceplotmaker.R$
