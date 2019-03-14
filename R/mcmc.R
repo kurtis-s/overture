@@ -48,7 +48,7 @@ InitSampMat <- function(samps, var, var.name, n.save, backing.path, overwrite) {
             if(!file.exists(desc.file.path)) {
                 stop(paste0("Tried to overwrite ", var.name,
                             " but couldn't find ", desc.file.path,
-                            "Try removing the old results manually."))
+                            ". Try removing the old results manually."))
             }
 
             samps <- InitExistingSampMat(backing.file.path, desc.file.path,
