@@ -26,29 +26,6 @@ AcceptProp <- function(log.curr, log.prop, log.curr.to.prop=0,
     log(u) <= (log.prop - log.curr + log.prop.to.curr - log.curr.to.prop)
 }
 
-#' Determine if a Metropolis–Hastings step should be accepted
-#'
-#' \code{AcceptProposal} is deprecated.  Please use \code{\link{AcceptProp}}
-#' instead.
-#'
-#' @param log.curr log density of the target at the current value,
-#'   \eqn{log(P(x))}
-#' @param log.prop log density of the target at the proposed value,
-#'   \eqn{log(P(x'))}
-#' @param log.curr.to.prop log of transition distribution from current value to
-#'   proposed value, \eqn{log(g(x'|x))}
-#' @param log.prop.to.curr log of transition distribution from proposed value to
-#'   current value, \eqn{log(g(x|x'))}
-#' @return \code{TRUE/FALSE} for whether the proposal should be accepted or
-#'   rejected, respectively
-#' @example examples/example-AcceptProp.R
-#' @export
-AcceptProposal <- function(log.curr, log.prop, log.curr.to.prop=0,
-                           log.prop.to.curr=0) {
-    .Deprecated("AcceptProp")
-    AcceptProp(log.curr, log.prop, log.curr.to.prop=0,  log.prop.to.curr=0)
-}
-
 DeltaNDefault <- function(n) {
     # Default proposal sd delta from Roberts & Rosenthal (2009)
     min(0.01, n^(-1/2))

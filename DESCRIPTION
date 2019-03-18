@@ -1,7 +1,7 @@
 Package: overture
 Type: Package
 Title: Tools for Writing MCMC 
-Version: 0.2-0
+Version: 0.3-0
 Authors@R: person("Kurtis", "Shuler", role=c("aut", "cre"), 
     email="kurtis.s.1122+CRAN@gmail.com")
 Description: Simplifies MCMC setup by automatically looping through sampling 
