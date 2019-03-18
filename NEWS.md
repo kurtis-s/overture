@@ -8,3 +8,4 @@
 
 # overture 0.3-0
 * Removed deprecated function AcceptProposal
+* Added option to Amwg to stop adapting after some number of iterations

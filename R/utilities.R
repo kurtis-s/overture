@@ -49,7 +49,12 @@ DeltaNDefault <- function(n) {
 #' \code{Amwg} keeps track of the the acceptance rate by comparing the
 #' previously sampled value from \code{f} to the next value.  If the two values
 #' are equal, the proposal is considered to be rejected, whereas if the two
-#' values are different the proposal is considered accepted.
+#' values are different the proposal is considered accepted.  \code{Amwg} will
+#' optionally stop adapting the proposal standard deviation after
+#' \code{stop.after} iterations.  Setting \code{stop.after} can be used, for
+#' example, to stop adapting the proposal standard deviation after some burn-in
+#' period.  If \code{stop.after=NA} (the default), \code{Amwg} will continue to
+#' modify the proposal standard deviation throughout the entire MCMC.
 #'
 #' \code{DeltaN} is set to \eqn{\delta(n) = min(0.01, n^{-1/2})} unless
 #' re-specified in the function call. Some care should be taken if re-specifying
@@ -74,7 +79,9 @@ DeltaNDefault <- function(n) {
 #' @param batch.size number of iterations before proposal SD is adapted
 #' @param target target acceptance rate
 #' @param DeltaN function of the form f(n) which returns the adaptation amount
-#'   based on the number of elapsed iterations, n
+#'   based on the number of elapsed iterations, n.  Defaults to \eqn{\delta(n) =
+#'   min(0.01, n^{-1/2})}
+#' @param stop.after stop adapting proposal SD after this many iterations
 #' @return Adaptive Metropolis sampler function of the form g(...).
 #' @references  Gareth O. Roberts & Jeffrey S. Rosenthal (2009) Examples of
 #'   Adaptive MCMC, Journal of Computational and Graphical Statistics, 18:2,
@@ -82,7 +89,16 @@ DeltaNDefault <- function(n) {
 #'
 #' @example examples/example-Amwg.R
 #' @export
-Amwg <- function(f, s, batch.size=50, target=0.44, DeltaN) {
+Amwg <- function(f, s, batch.size=50, target=0.44, DeltaN, stop.after=NA) {
+    if(!IsPositiveInteger(batch.size)) {
+        stop("'batch.size' must be an integer > 0")
+    }
+    if(!(IsPositiveInteger(stop.after) || is.na(stop.after))) {
+        stop("'stop.after' must be an integer > 0")
+    }
+    if(!((target>0) && (target<1))) stop("'target' must be 0<target<1")
+
+    if(is.na(stop.after)) stop.after <- Inf
     if(missing(DeltaN)) DeltaN <- DeltaNDefault
     n.iters <- 0
     n.accepted <- rep(0, length(s))
@@ -107,7 +123,7 @@ Amwg <- function(f, s, batch.size=50, target=0.44, DeltaN) {
         }
         accept.rate <<- n.accepted/n.iters
         prev <<- ret
-        if(n.iters %% batch.size == 0) {
+        if((n.iters %% batch.size == 0) && (n.iters <= stop.after)){
             delta.n <- DeltaN(n.iters)
             s <<- ifelse(accept.rate > target,
                          s*exp(delta.n),

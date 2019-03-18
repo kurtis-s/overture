@@ -4,7 +4,7 @@
 \alias{Amwg}
 \title{Turn a non-adaptive Metropolis sampler into an adaptive Metropolis sampler}
 \usage{
-Amwg(f, s, batch.size = 50, target = 0.44, DeltaN)
+Amwg(f, s, batch.size = 50, target = 0.44, DeltaN, stop.after = NA)
 }
 \arguments{
 \item{f}{non-adaptive Metropolis sampler of the form f(..., s)}
@@ -16,7 +16,10 @@ Amwg(f, s, batch.size = 50, target = 0.44, DeltaN)
 \item{target}{target acceptance rate}
 
 \item{DeltaN}{function of the form f(n) which returns the adaptation amount
-based on the number of elapsed iterations, n}
+based on the number of elapsed iterations, n.  Defaults to \eqn{\delta(n) =
+min(0.01, n^{-1/2})}}
+
+\item{stop.after}{stop adapting proposal SD after this many iterations}
 }
 \value{
 Adaptive Metropolis sampler function of the form g(...).
@@ -39,7 +42,12 @@ the observed acceptance rate is less than the target acceptance rate.
 \code{Amwg} keeps track of the the acceptance rate by comparing the
 previously sampled value from \code{f} to the next value.  If the two values
 are equal, the proposal is considered to be rejected, whereas if the two
-values are different the proposal is considered accepted.
+values are different the proposal is considered accepted.  \code{Amwg} will
+optionally stop adapting the proposal standard deviation after
+\code{stop.after} iterations.  Setting \code{stop.after} can be used, for
+example, to stop adapting the proposal standard deviation after some burn-in
+period.  If \code{stop.after=NA} (the default), \code{Amwg} will continue to
+modify the proposal standard deviation throughout the entire MCMC.
 
 \code{DeltaN} is set to \eqn{\delta(n) = min(0.01, n^{-1/2})} unless
 re-specified in the function call. Some care should be taken if re-specifying
