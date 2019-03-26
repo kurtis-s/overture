@@ -384,3 +384,23 @@ test_that("MCMC can be resumed", {
     expect_equivalent(samps$x[,], 1:5)
     expect_equivalent(samps$y[,], seq(10, 50, by=10))
 })
+
+test_that("Resume doesn't fail if MCMC is already complete", {
+    n.iter <- 5
+    SampleX <- function(x) x + 1
+    SampleY <- function(y) y + 10
+    backing.path <- TestDir()
+
+    x <- 0
+    y <- 0
+    Mcmc <- InitMcmc(n.iter, backing.path=backing.path)
+
+    samps <- Mcmc({
+        x <- SampleX(x)
+        y <- SampleY(y)
+    })
+    samps <- Resume(backing.path)
+
+    expect_equivalent(samps$x[,], 1:5)
+    expect_equivalent(samps$y[,], seq(10, 50, by=10))
+})

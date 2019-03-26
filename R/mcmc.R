@@ -251,9 +251,9 @@ LoadMcmc <- function(backing.path) {
     return(samps)
 }
 
-#' Get a vector with the row index of the first MCMC sample with incomplete
-#' samples, i.e. the first row that has some NA values for the parameter
 FirstMissIdxs <- function(samps) {
+# Get a vector with the row index of the first MCMC sample with incomplete
+# samples, i.e. the first row that has some NA values for the parameter
     first.miss.idxs <- vector(length=length(samps))
     for(i in 1:length(samps)) {
         param.curr <- samps[[i]]
@@ -271,9 +271,9 @@ FirstMissIdxs <- function(samps) {
     return(first.miss.idxs)
 }
 
-#' Get row index of the last sample that was fully completed for all parameters
 LastSampIdx <- function(first.miss.idxs) {
-    min(first.miss.idxs) - 1
+# Get row index of the last sample that was fully completed for all parameters
+    min(first.miss.idxs, na.rm=TRUE) - 1
 }
 
 RemoveMissingDraws <- function(samps) {
@@ -339,19 +339,24 @@ ToMemory <- function(samples) {
 Resume <- function(backing.path) {
     samps <- LoadMcmc(backing.path)
     first.miss.idxs <- FirstMissIdxs(samps)
-    last.samp.idx <- LastSampIdx(first.miss.idxs)
 
-    env <- new.env(parent=parent.frame(1))
-    # Re-assign the last completed parameter samples to the env
-    for(param.name in names(samps)) {
-        assign(param.name, samps[[param.name]][last.samp.idx,], pos=env)
+    # Run the rest of the MCMC if the MCMC isn't already complete
+    if(!all(is.na(first.miss.idxs))) {
+        env <- new.env(parent=parent.frame(1))
+
+        # Re-assign the last completed parameter samples to the env
+        last.samp.idx <- LastSampIdx(first.miss.idxs)
+        for(param.name in names(samps)) {
+            assign(param.name, samps[[param.name]][last.samp.idx,], pos=env)
+        }
+
+        call.lst <- readRDS(file.path(backing.path, "call_lst.rds"))
+        call.lst[["b.start"]] <- last.samp.idx + 1
+        call.lst[["env"]] <- env
+        call.lst[["samps"]] <- samps
+
+        samps <- do.call("RunMcmc", call.lst, quote=TRUE)
     }
 
-    call.lst <- readRDS(file.path(backing.path, "call_lst.rds"))
-    call.lst[["b.start"]] <- last.samp.idx + 1
-    call.lst[["env"]] <- env
-    call.lst[["samps"]] <- samps
-
-    # Run the rest of the MCMC
-    do.call("RunMcmc", call.lst, quote=TRUE)
+    return(samps)
 }

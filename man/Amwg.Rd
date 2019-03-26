@@ -98,6 +98,30 @@ lines(1:n.save, samples$y, col="red")
 legend("bottomleft", legend=c("Adaptive", "Non-adaptive"),
        col=c("black", "red"), lty=1, cex=0.8)
 
+# Sample from Gamma(10, 5) ------------------------------------------------
+LogP <- function(x) dgamma(x, 10, 5, log=TRUE) # Target distribution
+
+f <- function(x, s) { # Non-adaptive Metropolis sampler
+    x.prop <- x + rnorm(1, 0, s)
+    if(AcceptProp(LogP(x), LogP(x.prop))) {
+        x <- x.prop
+    }
+
+    return(x)
+}
+
+s.start <- 10
+stop.after <- 5000 # Stop changing the proposal SD after 5000 iterations
+g <- Amwg(f, s.start, batch.size=25, stop.after=stop.after)
+
+n.save <- 10000
+Mcmc <- InitMcmc(n.save)
+x <- 1
+samples <- Mcmc({
+    x <- g(x)
+})
+hist(samples$x[stop.after:n.save,], xlab="x", main="Gamma(10, 5)", freq=FALSE)
+curve(dgamma(x, 10, 5), from=0, to=max(samples$x), add=TRUE, col="blue")
 
 # Overdispersed Poisson ---------------------------------------------------
 ## Likelihood:
