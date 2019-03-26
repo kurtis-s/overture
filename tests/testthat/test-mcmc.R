@@ -404,3 +404,30 @@ test_that("Resume doesn't fail if MCMC is already complete", {
     expect_equivalent(samps$x[,], 1:5)
     expect_equivalent(samps$y[,], seq(10, 50, by=10))
 })
+
+test_that("Resume works if thinning is set", {
+    n.iter <- 5
+    thin <- 2
+    SampleX <- function(x) x + 1
+    SampleY <- function(y) y + 10
+    backing.path <- TestDir()
+
+    x <- 0
+    y <- 0
+    interrupt.mcmc <- TRUE
+    Mcmc <- InitMcmc(n.iter, backing.path=backing.path, thin=thin)
+
+    # Stop the MCMC in the middle of the run
+    testthat::expect_error(
+    samps <- Mcmc({
+        if(x==3 && interrupt.mcmc) break
+        x <- SampleX(x)
+        y <- SampleY(y)
+    }))
+
+    interrupt.mcmc <- FALSE
+    samps <- Resume(backing.path)
+
+    expect_equivalent(samps$x[,], seq(2, 10, by=2))
+    expect_equivalent(samps$y[,], seq(20, 100, by=20))
+})
