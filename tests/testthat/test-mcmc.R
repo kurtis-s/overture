@@ -359,6 +359,25 @@ test_that("Peek doesn't fail if the MCMC is complete", {
     expect_equivalent(samples.so.far$x[,], rep(1, n.iter))
 })
 
+test_that("Parameter dimensions can change if overwrite=TRUE", {
+    skip_on_os("windows") # file.remove doesn't always work on Windows
+    n.iter <- 5
+    backing.path <- TestDir()
+
+    f <- function() 1
+    Mcmc <- InitMcmc(n.iter, backing.path=backing.path, overwrite=TRUE)
+    samps <- Mcmc({
+        x <- f()
+    })
+
+    f <- function() c(2, 2)
+    samps <- Mcmc({
+        x <- f()
+    })
+    expect_equivalent(samps$x[,], matrix(rep(c(2, 2), each=n.iter),
+                                         nrow=n.iter, ncol=2))
+})
+
 test_that("MCMC can be resumed", {
     n.iter <- 5
     SampleX <- function(x) x + 1
