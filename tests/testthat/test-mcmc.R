@@ -344,7 +344,7 @@ test_that("Warning given if file-backed MCMC fails to flush on exit", {
     mockery::expect_called(m, 1)
 })
 
-test_that("Peek doesn't fail in the MCMC is complete", {
+test_that("Peek doesn't fail if the MCMC is complete", {
     n.iter <- 5
     SampleSomething <- function() 1
 
@@ -359,3 +359,28 @@ test_that("Peek doesn't fail in the MCMC is complete", {
     expect_equivalent(samples.so.far$x[,], rep(1, n.iter))
 })
 
+test_that("MCMC can be resumed", {
+    n.iter <- 5
+    SampleX <- function(x) x + 1
+    SampleY <- function(y) y + 10
+    backing.path <- TestDir()
+
+    x <- 0
+    y <- 0
+    interrupt.mcmc <- TRUE
+    Mcmc <- InitMcmc(n.iter, backing.path=backing.path)
+
+    # Stop the MCMC in the middle of the third iteration
+    testthat::expect_error(
+    samps <- Mcmc({
+        x <- SampleX(x)
+        if(x==3 && interrupt.mcmc) break
+        y <- SampleY(y)
+    }))
+
+    interrupt.mcmc <- FALSE
+    samps <- Resume(backing.path)
+
+    expect_equivalent(samps$x[,], 1:5)
+    expect_equivalent(samps$y[,], seq(10, 50, by=10))
+})
