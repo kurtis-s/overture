@@ -319,7 +319,7 @@ test_that("File-backed MCMC is flushed on exit", {
 
     m <- mockery::mock(TRUE, TRUE)
     Mcmc <- InitMcmc(iter, test.dir)
-    with_mock(flush = m,
+    with_mock(flush=m,
               samps <- Mcmc({ x <- c(1, 2)
                               y <- 1 }),
               .env="bigmemory")
@@ -337,7 +337,7 @@ test_that("Warning given if file-backed MCMC fails to flush on exit", {
 
     m <- mockery::mock(FALSE)
     Mcmc <- InitMcmc(iter, test.dir)
-    expect_warning(with_mock(flush = m,
+    expect_warning(with_mock(flush=m,
                              samps <- Mcmc({ x <- c(1, 2)}),
                              .env="bigmemory"),
                    flush.failed.warning.msg)
@@ -376,6 +376,31 @@ test_that("Parameter dimensions can change if overwrite=TRUE", {
     })
     expect_equivalent(samps$x[,], matrix(rep(c(2, 2), each=n.iter),
                                          nrow=n.iter, ncol=2))
+})
+
+test_that("Error message given if backing file can't be removed", {
+    skip_on_os("windows") # file.remove doesn't always work on Windows
+    n.iter <- 5
+    backing.path <- TestDir()
+    file.rm.err.msg <- paste0("Failed to remove ", file.path(backing.path, "x"),
+                              ".  Try removing the file manually.")
+
+    f <- function() 1
+    Mcmc <- InitMcmc(n.iter, backing.path=backing.path, overwrite=TRUE)
+    samps <- Mcmc({
+        x <- f()
+    })
+
+    m <- mockery::mock(FALSE)
+    # mockery::stub(Mcmc, 'FileRemove', m, depth=10)
+    f <- function() c(2, 2)
+
+    expect_error(with_mock(file.remove=m,
+                           samps <- Mcmc({ x <- f() })),
+                 file.rm.err.msg,
+                 fixed=TRUE
+    )
+    mockery::expect_called(m, 1)
 })
 
 test_that("MCMC can be resumed", {
