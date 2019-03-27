@@ -403,6 +403,23 @@ test_that("Error message given if backing file can't be removed", {
     mockery::expect_called(m, 1)
 })
 
+test_that("Error message given if .desc file isn't found and overwrite=TRUE", {
+    n.iter <- 5
+    backing.path <- TestDir()
+    desc.rm.err.msg <- paste0("Tried to overwrite ", "x",
+           " but couldn't find ", file.path(backing.path, "x.desc"),
+           ". Try removing the old results manually.")
+
+    f <- function() 1
+    Mcmc <- InitMcmc(n.iter, backing.path=backing.path, overwrite=TRUE)
+    samps <- Mcmc({
+        x <- f()
+    })
+
+    file.remove(file.path(backing.path, "x.desc"))
+    expect_error(samps <- Mcmc({ x <- f() }), desc.rm.err.msg, fixed=TRUE)
+})
+
 test_that("MCMC can be resumed", {
     n.iter <- 5
     SampleX <- function(x) x + 1
