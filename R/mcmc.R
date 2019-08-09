@@ -334,8 +334,21 @@ ToMemory <- function(samples) {
 
 #' Resumes an interrupted file-backed MCMC
 #'
-#' @param backing.path directory path where MCMC samples were saved
+#' \code{Resume} will finish a file-backed MCMC that was interrupted.  To resume
+#' an MCMC run, specify the MCMC's backing path and the sampling will continue
+#' from the last completed sample in the chain.  Note, however, that the random
+#' number generator state from when the MCMC was interrupted is \emph{not}
+#' restored, so the resulting chain my not be reproducible, even if a seed was
+#' specified before the sampling was interrupted.
+#'
+#' @param backing.path directory path where the (partially completed) MCMC
+#'   samples were saved
+#' @return A list of either \code{\link{matrix}} or \code{\link{big.matrix}}
+#'   with the MCMC samples.  Each row in the matrices corresponds to one sample
+#'   from the MCMC chain.
+#' @example examples/example-Resume.R
 #' @export
+#' @seealso \code{\link{InitMcmc}}
 Resume <- function(backing.path) {
     samps <- LoadMcmc(backing.path)
     first.miss.idxs <- FirstMissIdxs(samps)
