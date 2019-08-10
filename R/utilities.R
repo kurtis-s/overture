@@ -33,14 +33,14 @@ DeltaNDefault <- function(n) {
 
 #' Turn a non-adaptive Metropolis sampler into an adaptive Metropolis sampler
 #'
-#' Given a non-adpative sampler of the form f(..., s), \code{Amwg} will return a
+#' Given a non-adaptive sampler of the form f(..., s), \code{Amwg} will return a
 #' function g(...) that automatically adapts the Metropolis proposal standard
-#' deviation s to try and acheive a target acceptance rate.
+#' deviation s to try and achieve a target acceptance rate.
 #'
 #' \code{Amwg} uses the Adaptive Metropolis-Within-Gibbs algorithm from Roberts
 #' & Rosenthal (2009), which re-scales the proposal standard deviation after a
 #' fixed number of MCMC iterations have elapsed.  The goal of the algorithm is
-#' to acheive a target acceptance rate for the Metropolis step.  After the
+#' to achieve a target acceptance rate for the Metropolis step.  After the
 #' n\emph{th} batch of MCMC iterations the log of the proposal standard
 #' deviation, \eqn{log(s)}, is increased/decreased by \eqn{\delta(n)}.
 #' \eqn{log(s)} is increased by \eqn{\delta(n)} if the observed acceptance rate
@@ -71,7 +71,7 @@ DeltaNDefault <- function(n) {
 #' by \eqn{f}.  This functionality can be used, for example, if \eqn{f} samples
 #' each of its returned elements individually, updating each element using a
 #' Metropolis step.  See the examples for an illustration of this use case.  In
-#' such settings, \eqn{f} should be contructed to receive \eqn{s} as a vector
+#' such settings, \eqn{f} should be constructed to receive \eqn{s} as a vector
 #' argument.
 #'
 #' @param f non-adaptive Metropolis sampler of the form f(..., s)
