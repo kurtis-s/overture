@@ -319,7 +319,7 @@ test_that("File-backed MCMC is flushed on exit", {
 
     m <- mockery::mock(TRUE, TRUE)
     Mcmc <- InitMcmc(iter, test.dir)
-    with_mock(flush = m,
+    with_mock(flush=m,
               samps <- Mcmc({ x <- c(1, 2)
                               y <- 1 }),
               .env="bigmemory")
@@ -337,14 +337,14 @@ test_that("Warning given if file-backed MCMC fails to flush on exit", {
 
     m <- mockery::mock(FALSE)
     Mcmc <- InitMcmc(iter, test.dir)
-    expect_warning(with_mock(flush = m,
+    expect_warning(with_mock(flush=m,
                              samps <- Mcmc({ x <- c(1, 2)}),
                              .env="bigmemory"),
                    flush.failed.warning.msg)
     mockery::expect_called(m, 1)
 })
 
-test_that("Peek doesn't fail in the MCMC is complete", {
+test_that("Peek doesn't fail if the MCMC is complete", {
     n.iter <- 5
     SampleSomething <- function() 1
 
@@ -359,3 +359,136 @@ test_that("Peek doesn't fail in the MCMC is complete", {
     expect_equivalent(samples.so.far$x[,], rep(1, n.iter))
 })
 
+test_that("Parameter dimensions can change if overwrite=TRUE", {
+    skip_on_os("windows") # file.remove doesn't always work on Windows
+    n.iter <- 5
+    backing.path <- TestDir()
+
+    f <- function() 1
+    Mcmc <- InitMcmc(n.iter, backing.path=backing.path, overwrite=TRUE)
+    samps <- Mcmc({
+        x <- f()
+    })
+
+    f <- function() c(2, 2)
+    samps <- Mcmc({
+        x <- f()
+    })
+    expect_equivalent(samps$x[,], matrix(rep(c(2, 2), each=n.iter),
+                                         nrow=n.iter, ncol=2))
+})
+
+test_that("Error message given if backing file can't be removed", {
+    skip_on_os("windows") # file.remove doesn't always work on Windows
+    n.iter <- 5
+    backing.path <- TestDir()
+    file.rm.err.msg <- paste0("Failed to remove ", file.path(backing.path, "x"),
+                              ".  Try removing the file manually.")
+
+    f <- function() 1
+    Mcmc <- InitMcmc(n.iter, backing.path=backing.path, overwrite=TRUE)
+    samps <- Mcmc({
+        x <- f()
+    })
+
+    m <- mockery::mock(FALSE)
+    # mockery::stub(Mcmc, 'FileRemove', m, depth=10)
+    f <- function() c(2, 2)
+
+    expect_error(with_mock(file.remove=m,
+                           samps <- Mcmc({ x <- f() })),
+                 file.rm.err.msg,
+                 fixed=TRUE
+    )
+    mockery::expect_called(m, 1)
+})
+
+test_that("Error message given if .desc file isn't found and overwrite=TRUE", {
+    n.iter <- 5
+    backing.path <- TestDir()
+    desc.rm.err.msg <- paste0("Tried to overwrite ", "x",
+           " but couldn't find ", file.path(backing.path, "x.desc"),
+           ". Try removing the old results manually.")
+
+    f <- function() 1
+    Mcmc <- InitMcmc(n.iter, backing.path=backing.path, overwrite=TRUE)
+    samps <- Mcmc({
+        x <- f()
+    })
+
+    file.remove(file.path(backing.path, "x.desc"))
+    expect_error(samps <- Mcmc({ x <- f() }), desc.rm.err.msg, fixed=TRUE)
+})
+
+test_that("MCMC can be resumed", {
+    n.iter <- 5
+    SampleX <- function(x) x + 1
+    SampleY <- function(y) y + 10
+    backing.path <- TestDir()
+
+    x <- 0
+    y <- 0
+    interrupt.mcmc <- TRUE
+    Mcmc <- InitMcmc(n.iter, backing.path=backing.path)
+
+    # Stop the MCMC in the middle of the third iteration
+    testthat::expect_error(
+    samps <- Mcmc({
+        x <- SampleX(x)
+        if(x==3 && interrupt.mcmc) break
+        y <- SampleY(y)
+    }))
+
+    interrupt.mcmc <- FALSE
+    samps <- Resume(backing.path)
+
+    expect_equivalent(samps$x[,], 1:5)
+    expect_equivalent(samps$y[,], seq(10, 50, by=10))
+})
+
+test_that("Resume doesn't fail if MCMC is already complete", {
+    n.iter <- 5
+    SampleX <- function(x) x + 1
+    SampleY <- function(y) y + 10
+    backing.path <- TestDir()
+
+    x <- 0
+    y <- 0
+    Mcmc <- InitMcmc(n.iter, backing.path=backing.path)
+
+    samps <- Mcmc({
+        x <- SampleX(x)
+        y <- SampleY(y)
+    })
+    samps <- Resume(backing.path)
+
+    expect_equivalent(samps$x[,], 1:5)
+    expect_equivalent(samps$y[,], seq(10, 50, by=10))
+})
+
+test_that("Resume works if thinning is set", {
+    n.iter <- 5
+    thin <- 2
+    SampleX <- function(x) x + 1
+    SampleY <- function(y) y + 10
+    backing.path <- TestDir()
+
+    x <- 0
+    y <- 0
+    interrupt.mcmc <- TRUE
+    Mcmc <- InitMcmc(n.iter, backing.path=backing.path, thin=thin)
+
+    # Stop the MCMC in the middle of the run
+    testthat::expect_error(
+    samps <- Mcmc({
+        if(x==3 && interrupt.mcmc) break
+        x <- SampleX(x)
+        y <- SampleY(y)
+    }))
+
+    interrupt.mcmc <- FALSE
+    samps <- Resume(backing.path)
+
+    expect_equivalent(samps$x[,], seq(2, 10, by=2))
+    expect_equivalent(samps$y[,], seq(20, 100, by=20))
+})

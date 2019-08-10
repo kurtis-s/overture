@@ -102,6 +102,34 @@ FlushMats <- function(samps) {
     })
 }
 
+RunMcmc <- function(samps, b.start, expr_q, env, n.save, backing.path, thin,
+                    exclude, overwrite) {
+    # If file-backed, save the call so the MCMC can be resumed
+    if(!is.na(backing.path)) {
+        call.lst <- as.list(environment())
+        call.lst[["env"]] <- NULL
+        saveRDS(call.lst, file.path(backing.path, "call_lst.rds"))
+    }
+
+    env.len <- -1
+    for(b in b.start:n.save) {
+        for(t in 1:thin) {
+            eval(expr_q, envir=env)
+        }
+        if(env.len != length(env)) {
+            samps <- InitSampMats(env, samps, n.save, backing.path, exclude,
+                                  overwrite)
+            env.len <- length(env)
+        }
+        for(var.name in names(samps)) {
+            samps[[var.name]][b, ] <- c(env[[var.name]])
+        }
+    }
+    FlushMats(samps)
+
+    return(samps)
+}
+
 #' Initialize a Markov chain Monte Carlo run
 #'
 #' Eliminates much of the "boilerplate" code needed for MCMC implementations by
@@ -180,24 +208,8 @@ InitMcmc <- function(n.save, backing.path=NA, thin=1, exclude=NULL,
     function(expr, overwrite=over.write) {
         expr_q <- substitute(expr)
         env <- new.env(parent=parent.frame(1))
-        env.len <- -1
         samps <- list()
-        for(b in 1:n.save) {
-            for(t in 1:thin) {
-                eval(expr_q, envir=env)
-            }
-            if(env.len != length(env)) {
-                samps <- InitSampMats(env, samps, n.save, backing.path, exclude,
-                                      overwrite)
-                env.len <- length(env)
-            }
-            for(var.name in names(samps)) {
-                samps[[var.name]][b, ] <- c(env[[var.name]])
-            }
-        }
-        FlushMats(samps)
-
-        return(samps)
+        RunMcmc(samps, 1, expr_q, env, n.save, backing.path, thin, exclude, overwrite)
     }
 }
 
@@ -239,7 +251,9 @@ LoadMcmc <- function(backing.path) {
     return(samps)
 }
 
-RemoveMissingDraws <- function(samps) {
+FirstMissIdxs <- function(samps) {
+# Get a vector with the row index of the first MCMC sample with incomplete
+# samples, i.e. the first row that has some NA values for the parameter
     first.miss.idxs <- vector(length=length(samps))
     for(i in 1:length(samps)) {
         param.curr <- samps[[i]]
@@ -254,13 +268,23 @@ RemoveMissingDraws <- function(samps) {
         }
     }
 
+    return(first.miss.idxs)
+}
+
+LastSampIdx <- function(first.miss.idxs) {
+# Get row index of the last sample that was fully completed for all parameters
+    min(first.miss.idxs, na.rm=TRUE) - 1
+}
+
+RemoveMissingDraws <- function(samps) {
+    first.miss.idxs <- FirstMissIdxs(samps)
     if(all(is.na(first.miss.idxs))) { # No missing values, MCMC is finished
         samps.subsetted <- samps
     }
     else {
-        last.available.sample <- min(first.miss.idxs) - 1
+        last.samp.idx <- LastSampIdx(first.miss.idxs)
         samps.subsetted <- lapply(samps, function(x) {
-            bigmemory::sub.big.matrix(x, lastRow=last.available.sample)
+            bigmemory::sub.big.matrix(x, lastRow=last.samp.idx)
         })
     }
 
@@ -306,4 +330,46 @@ ToMemory <- function(samples) {
         dim(in.mem.mat) <- x.dim
         in.mem.mat
     })
+}
+
+#' Resumes an interrupted file-backed MCMC
+#'
+#' \code{Resume} will finish a file-backed MCMC that was interrupted.  To resume
+#' an MCMC run, specify the MCMC's backing path and the sampling will continue
+#' from the last completed sample in the chain.  Note, however, that the random
+#' number generator state from when the MCMC was interrupted is \emph{not}
+#' restored, so the resulting chain my not be reproducible, even if a seed was
+#' specified before the sampling was interrupted.
+#'
+#' @param backing.path directory path where the (partially completed) MCMC
+#'   samples were saved
+#' @return A list of either \code{\link{matrix}} or \code{\link{big.matrix}}
+#'   with the MCMC samples.  Each row in the matrices corresponds to one sample
+#'   from the MCMC chain.
+#' @example examples/example-Resume.R
+#' @export
+#' @seealso \code{\link{InitMcmc}}
+Resume <- function(backing.path) {
+    samps <- LoadMcmc(backing.path)
+    first.miss.idxs <- FirstMissIdxs(samps)
+
+    # Run the rest of the MCMC if the MCMC isn't already complete
+    if(!all(is.na(first.miss.idxs))) {
+        env <- new.env(parent=parent.frame(1))
+
+        # Re-assign the last completed parameter samples to the env
+        last.samp.idx <- LastSampIdx(first.miss.idxs)
+        for(param.name in names(samps)) {
+            assign(param.name, samps[[param.name]][last.samp.idx,], pos=env)
+        }
+
+        call.lst <- readRDS(file.path(backing.path, "call_lst.rds"))
+        call.lst[["b.start"]] <- last.samp.idx + 1
+        call.lst[["env"]] <- env
+        call.lst[["samps"]] <- samps
+
+        samps <- do.call("RunMcmc", call.lst, quote=TRUE)
+    }
+
+    return(samps)
 }

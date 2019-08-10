@@ -207,3 +207,35 @@ test_that("Custom DeltaN is applied correctly", {
     expect_equal(s.after, exp(log(s.before) - delta.n))
 })
 
+test_that("Amwg (optionally) stops adapting", {
+    stop.val <- 6
+    batch.size <- 2
+    s.start <- 10
+    m <- mockery::mock(1, cycle=TRUE) # Never accept proposal
+
+    f <- function(s) m()
+    g <- Amwg(f, s.start, batch.size=batch.size, stop.after=stop.val)
+
+    # Adapt for a while
+    g()
+    s.prev <- get("s", envir=environment(g))
+    for(i in 2:stop.val) {
+        g()
+        s.curr <- get("s", envir=environment(g))
+        if(i %% batch.size == 0) {
+            expect_lt(s.curr, s.prev)
+        }
+        else {
+            expect_equal(s.curr, s.prev)
+        }
+        s.prev <- s.curr
+    }
+
+    # Stop adapting after stop.val
+    for(j in 1:10) {
+        g()
+        s.curr <- get("s", envir=environment(g))
+            expect_equal(s.curr, s.prev)
+        s.prev <- s.curr
+    }
+})

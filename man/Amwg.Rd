@@ -4,7 +4,7 @@
 \alias{Amwg}
 \title{Turn a non-adaptive Metropolis sampler into an adaptive Metropolis sampler}
 \usage{
-Amwg(f, s, batch.size = 50, target = 0.44, DeltaN)
+Amwg(f, s, batch.size = 50, target = 0.44, DeltaN, stop.after = NA)
 }
 \arguments{
 \item{f}{non-adaptive Metropolis sampler of the form f(..., s)}
@@ -16,21 +16,24 @@ Amwg(f, s, batch.size = 50, target = 0.44, DeltaN)
 \item{target}{target acceptance rate}
 
 \item{DeltaN}{function of the form f(n) which returns the adaptation amount
-based on the number of elapsed iterations, n}
+based on the number of elapsed iterations, n.  Defaults to \eqn{\delta(n) =
+min(0.01, n^{-1/2})}}
+
+\item{stop.after}{stop adapting proposal SD after this many iterations}
 }
 \value{
 Adaptive Metropolis sampler function of the form g(...).
 }
 \description{
-Given a non-adpative sampler of the form f(..., s), \code{Amwg} will return a
+Given a non-adaptive sampler of the form f(..., s), \code{Amwg} will return a
 function g(...) that automatically adapts the Metropolis proposal standard
-deviation s to try and acheive a target acceptance rate.
+deviation s to try and achieve a target acceptance rate.
 }
 \details{
 \code{Amwg} uses the Adaptive Metropolis-Within-Gibbs algorithm from Roberts
 & Rosenthal (2009), which re-scales the proposal standard deviation after a
 fixed number of MCMC iterations have elapsed.  The goal of the algorithm is
-to acheive a target acceptance rate for the Metropolis step.  After the
+to achieve a target acceptance rate for the Metropolis step.  After the
 n\emph{th} batch of MCMC iterations the log of the proposal standard
 deviation, \eqn{log(s)}, is increased/decreased by \eqn{\delta(n)}.
 \eqn{log(s)} is increased by \eqn{\delta(n)} if the observed acceptance rate
@@ -39,7 +42,12 @@ the observed acceptance rate is less than the target acceptance rate.
 \code{Amwg} keeps track of the the acceptance rate by comparing the
 previously sampled value from \code{f} to the next value.  If the two values
 are equal, the proposal is considered to be rejected, whereas if the two
-values are different the proposal is considered accepted.
+values are different the proposal is considered accepted.  \code{Amwg} will
+optionally stop adapting the proposal standard deviation after
+\code{stop.after} iterations.  Setting \code{stop.after} can be used, for
+example, to stop adapting the proposal standard deviation after some burn-in
+period.  If \code{stop.after=NA} (the default), \code{Amwg} will continue to
+modify the proposal standard deviation throughout the entire MCMC.
 
 \code{DeltaN} is set to \eqn{\delta(n) = min(0.01, n^{-1/2})} unless
 re-specified in the function call. Some care should be taken if re-specifying
@@ -56,7 +64,7 @@ treated as individual proposal standard deviations for the elements returned
 by \eqn{f}.  This functionality can be used, for example, if \eqn{f} samples
 each of its returned elements individually, updating each element using a
 Metropolis step.  See the examples for an illustration of this use case.  In
-such settings, \eqn{f} should be contructed to receive \eqn{s} as a vector
+such settings, \eqn{f} should be constructed to receive \eqn{s} as a vector
 argument.
 }
 \examples{
@@ -90,6 +98,30 @@ lines(1:n.save, samples$y, col="red")
 legend("bottomleft", legend=c("Adaptive", "Non-adaptive"),
        col=c("black", "red"), lty=1, cex=0.8)
 
+# Sample from Gamma(10, 5) ------------------------------------------------
+LogP <- function(x) dgamma(x, 10, 5, log=TRUE) # Target distribution
+
+f <- function(x, s) { # Non-adaptive Metropolis sampler
+    x.prop <- x + rnorm(1, 0, s)
+    if(AcceptProp(LogP(x), LogP(x.prop))) {
+        x <- x.prop
+    }
+
+    return(x)
+}
+
+s.start <- 10
+stop.after <- 5000 # Stop changing the proposal SD after 5000 iterations
+g <- Amwg(f, s.start, batch.size=25, stop.after=stop.after)
+
+n.save <- 10000
+Mcmc <- InitMcmc(n.save)
+x <- 1
+samples <- Mcmc({
+    x <- g(x)
+})
+hist(samples$x[stop.after:n.save,], xlab="x", main="Gamma(10, 5)", freq=FALSE)
+curve(dgamma(x, 10, 5), from=0, to=max(samples$x), add=TRUE, col="blue")
 
 # Overdispersed Poisson ---------------------------------------------------
 ## Likelihood:
