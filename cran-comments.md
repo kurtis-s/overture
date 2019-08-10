@@ -9,4 +9,9 @@
 There were no ERRORs, WARNINGs, or NOTEs.
 
 ## R CMD check results with --run-donttest
-Ran on local; x86_64-apple-darwin15.6.0 (64-bit), R version 3.5.2 (2018-12-20).  There were no ERRORs, WARNINGs, or NOTEs.
+Ran on local; x86_64-apple-darwin15.6.0 (64-bit), R version 3.5.2 (2018-12-20).  There were no ERRORs, WARNINGs.  One note:
+
+* checking examples ... NOTE
+Examples with CPU or elapsed time > 5s
+      user system elapsed
+Peek 0.527   0.04 104.113
